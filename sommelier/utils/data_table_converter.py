@@ -1,4 +1,4 @@
-from core.utils.identifier_resolver import resolve_id_or_tautology
+from sommelier.utils.identifier_resolver import resolve_id_or_tautology
 
 
 def column_list(context):

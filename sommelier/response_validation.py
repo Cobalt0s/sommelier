@@ -1,12 +1,12 @@
-from core.utils import get_json, table_as_dict
-from core.utils.assertions import (
+from sommelier.utils import get_json, table_as_dict
+from sommelier.utils.assertions import (
     assert_json_properties_in_object,
     assert_json_properties_in_list,
     assert_json_properties_not_in_list,
 )
-from core.utils.data_table_converter import column_list
-from core.utils.json_zoomer import zoom_in_json
-from core.utils.list_lookup import context_contains, context_missing
+from sommelier.utils.data_table_converter import column_list
+from sommelier.utils.json_zoomer import zoom_in_json
+from sommelier.utils.list_lookup import context_contains, context_missing
 
 STATUS_CODES = {
     'OK': 200,

@@ -1,4 +1,4 @@
-from core.utils import get_json
+from sommelier.utils import get_json
 
 
 class PaginationNavigator:

@@ -1,4 +1,4 @@
-from core.utils import get_json
+from sommelier.utils import get_json
 
 
 def context_contains(context, first_key, second_key, value):

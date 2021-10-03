@@ -1,5 +1,5 @@
-from core.utils.data_table_converter import table_as_2d_list
-from core.utils.json_zoomer import zoom_in_json
+from sommelier.utils.data_table_converter import table_as_2d_list
+from sommelier.utils.json_zoomer import zoom_in_json
 
 
 def assert_json_properties_in_object(context, json):

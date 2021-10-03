@@ -1,7 +1,7 @@
 import requests
 
-from core.utils.data_table_converter import table_as_dict
-from core.utils.query_param_handler import query_params
+from sommelier.utils.data_table_converter import table_as_dict
+from sommelier.utils.query_param_handler import query_params
 
 
 class ApiClient:

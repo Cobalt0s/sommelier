@@ -1,5 +1,5 @@
-from core.events import EventConsumer, EventProducer
-from core.utils import table_as_dict
+from sommelier.events import EventConsumer, EventProducer
+from sommelier.utils import table_as_dict
 
 
 def events_equal(expected_event, given_event):

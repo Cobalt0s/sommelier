@@ -1,5 +1,5 @@
-from core.utils import get_json
-from core.utils.identifier_resolver import resolve_alias, create_alias, clear_aliases
+from sommelier.utils import get_json
+from sommelier.utils.identifier_resolver import resolve_alias, create_alias, clear_aliases
 
 
 class IdentifierRegistry:

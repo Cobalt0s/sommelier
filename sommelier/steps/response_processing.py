@@ -3,8 +3,8 @@ from uuid import uuid4
 
 from behave import given, then, when
 
-from core import response_validator, pagination_navigator, identifier_registry
-from core.utils import get_json
+from sommelier import response_validator, pagination_navigator, identifier_registry
+from sommelier.utils import get_json
 
 
 @then('Response status is {status}')

@@ -1,2 +1,2 @@
-from core.events.consumer import EventConsumer
-from core.events.producer import EventProducer
+from sommelier.events.consumer import EventConsumer
+from sommelier.events.producer import EventProducer

@@ -1,6 +1,6 @@
 import requests
 
-from core.utils import table_as_dict
+from sommelier.utils import table_as_dict
 
 
 class WsSocketManager:

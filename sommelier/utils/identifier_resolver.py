@@ -1,4 +1,4 @@
-from bson import ObjectId
+from uuid import uuid4
 
 
 def create_alias(context, alias_id, identifier):
@@ -23,7 +23,7 @@ def resolve_id_or_tautology(context, item):
         item = item[1:]
         if item.startswith('#'):
             # Generate Id
-            return str(ObjectId())
+            return str(uuid4())
         return resolve_alias(context, item)
 
     return item
