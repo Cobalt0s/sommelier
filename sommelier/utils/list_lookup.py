@@ -3,16 +3,16 @@ from sommelier.utils import get_json
 
 def context_contains(context, first_key, second_key, value):
     json = get_json(context)
-    if first_key in json:
-        _list_search(json[first_key], second_key, value, expected_to_find=True)
+    if json.has(first_key):
+        _list_search(json.get(first_key), second_key, value, expected_to_find=True)
     else:
         assert True
 
 
 def context_missing(context, first_key, second_key, value):
     json = get_json(context)
-    if first_key in json:
-        _list_search(json[first_key], second_key, value, expected_to_find=False)
+    if json.has(first_key):
+        _list_search(json.get(first_key), second_key, value, expected_to_find=False)
     else:
         assert True
 

@@ -86,5 +86,5 @@ def wait_time(context, duration):
 @when('Selecting one of the objects and saving as {item_id}')
 def select_object_and_save(context, item_id):
     json = get_json(context)
-    identifier = json['data'][0]['id']
+    identifier = json.get('data').data[0]['id']
     identifier_registry.create_alias(item_id, identifier)

@@ -22,7 +22,7 @@ class IdentifierRegistry:
             raise Exception(f'Response is not ok "{code}", cannot extract id {json}')
         if not json.get('id'):
             raise Exception(f'Response is missing id {json}')
-        create_alias(self.context, alias_id, json['id'])
+        create_alias(self.context, alias_id, json.get('id'))
 
     def create_alias(self, alias_id, identifier):
         create_alias(self.context, alias_id, identifier)

@@ -8,8 +8,8 @@ from sommelier.utils.assertions import (
     assert_json_properties_not_in_list,
 )
 from sommelier.utils.data_table_converter import column_list
-from sommelier.utils.json_zoomer import zoom_in_json
 from sommelier.utils.list_lookup import context_contains, context_missing
+from sommelier.utils.logger import log_fatal, Judge
 
 STATUS_CODES = {
     'OK': 200,
@@ -67,41 +67,37 @@ class ResponseValidator(object):
 
     def assert_status(self, status):
         status_code = STATUS_CODES[status.upper()]
-        assert status_code is not None
-        assert status_code == self.context.result.status_code, \
+        Judge(self.context).assumption(status_code is not None, f'status code {status.upper} is not supported')
+        Judge(self.context).claim(
+            status_code == self.context.result.status_code,
             f"Expected {status_code} given {self.context.result.status_code} {self._extract_error_for_debugging()}"
+        )
 
     def _extract_error_for_debugging(self):
-        if self.context.result.status_code == STATUS_CODES['UNAUTHORIZED']:
-            return 'Request is Unauthorized, need to login'
-        if hasattr(self.context.result, 'json'):
-            json = get_json(self.context)
-            error_of_failure_present = 'error' in json
-            error = f"[Failure: {json['error']}']" if error_of_failure_present else ''
-            return error
-        return ''
+        json = get_json(self.context)
+        return f"[Failure: {json.get('error')}']" if json.has('error') else ''
 
     def check_failure(self, code, details=None):
-        error = get_json(self.context)['error']
-        failure_code = error['code']
-        failure_details = error['details']
+        json = get_json(self.context)
+        failure_code = json.get('error.code').raw_str()
+        failure_details = json.get('error.details')
         if details is None:
             # We have a dictionary of values to see in details
             assert code == failure_code, f"Expected error of failure '{code}' actual '{failure_code}'"
             expected_details = table_as_dict(self.context)
             for key in expected_details:
                 x = expected_details[key]
-                y = failure_details[key]
-                assert x == y, f"Expected {x} actual {y} for {key} in error details"
+                y = failure_details.get(key)
+                assert x == y.data, f"Expected {x} actual {y} for {key} in error details" ### TODO do not use .data, use getter
         else:
             # We have a single value in detail
             assert code == failure_code, f"Expected error of failure '{code}' actual '{failure_code}'"
             assert details == failure_details, f"Expected {details} actual {failure_details} in error details"
 
     def missing_keys(self):
-        error = get_json(self.context)['error']
-        failure_code = error['code']
-        failure_details = error['details']
+        json = get_json(self.context)
+        failure_code = json.get('error.code').raw_str()
+        failure_details = json.get('error.details').raw_array()
 
         code = 'missing-required-values'
         assert code == failure_code, f"Expected error of failure {code} actual '{failure_code}'"
@@ -129,14 +125,11 @@ class ResponseValidator(object):
             you can apply assertion on list or object via assertion_func
             located under item_key which is x or y in our case
         """
-        json = get_json(self.context)
-        if item_key in json:
-            assertion_func(self.context, json[item_key])
-        else:
-            raise Exception(f'Missing key "{item_key}" in response body {json}')
+        assertion_func(self.context, get_json(self.context).get(item_key))
+
 
     def count_data(self, zoom, amount):
         amount = int(amount)
-        elements = zoom_in_json(get_json(self.context), zoom)
+        elements = get_json(self.context).get(zoom).raw_array()
         size = len(elements)
         assert amount == size, f"Expected {amount} elements on page, given {size}"
