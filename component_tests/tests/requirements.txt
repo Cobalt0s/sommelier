@@ -1,0 +1,2 @@
+sommelier==0.12
+behave==1.2.6
