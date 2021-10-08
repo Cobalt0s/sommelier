@@ -66,16 +66,12 @@ class ResponseValidator(object):
         return ResponseListChecker(self.context, self.identifier_registry, key)
 
     def assert_status(self, status):
+        Judge(self.context).assumption(status.upper() in STATUS_CODES, f'status code {status.upper()} is not supported')
         status_code = STATUS_CODES[status.upper()]
-        Judge(self.context).assumption(status_code is not None, f'status code {status.upper} is not supported')
-        Judge(self.context).claim(
+        Judge(self.context).expectation(
             status_code == self.context.result.status_code,
-            f"Expected {status_code} given {self.context.result.status_code} {self._extract_error_for_debugging()}"
+            f"Expected {status_code} given {self.context.result.status_code}"
         )
-
-    def _extract_error_for_debugging(self):
-        json = get_json(self.context)
-        return f"[Failure: {json.get('error')}']" if json.has('error') else ''
 
     def check_failure(self, code, details=None):
         json = get_json(self.context)
@@ -88,11 +84,20 @@ class ResponseValidator(object):
             for key in expected_details:
                 x = expected_details[key]
                 y = failure_details.get(key)
-                assert x == y.data, f"Expected {x} actual {y} for {key} in error details" ### TODO do not use .data, use getter
+                Judge(self.context).expectation(
+                    x == y.data,  ### TODO do not use .data, use getter
+                    f"Expected `{x}` actual `{y}` for error.details.{key}"
+                )
         else:
             # We have a single value in detail
-            assert code == failure_code, f"Expected error of failure '{code}' actual '{failure_code}'"
-            assert details == failure_details, f"Expected {details} actual {failure_details} in error details"
+            Judge(self.context).expectation(
+                code == failure_code,
+                f"Expected error code '{code}' actual '{failure_code}'",
+            )
+            Judge(self.context).expectation(
+                details == failure_details,
+                f"Expected `{details}` actual `{failure_details}` for error.details"
+            )
 
     def missing_keys(self):
         json = get_json(self.context)

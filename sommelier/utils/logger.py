@@ -1,3 +1,4 @@
+import json
 
 
 class Judge:
@@ -5,9 +6,12 @@ class Judge:
     def __init__(self, context):
         self.context = context
 
-    def claim(self, condition, message):
+    def expectation(self, condition, message):
         if not condition:
-            log_error(self.context, message)
+            extra_details = "No JSON"
+            if hasattr(self.context.result, 'json'):
+                extra_details = self.context.result.json()
+            log_error(self.context, message, extra_details)
 
     def assumption(self, condition, message):
         if not condition:
@@ -15,13 +19,19 @@ class Judge:
         assert True
 
 
-def log_error(context, text):
-    print(f'🌍 {context.feature.name} >> {context.scenario.name}')
-    print(f'[❌] ERROR 🍷 >> {text}')
+def log_error(context, text, extra_details=None):
+    print(f'[ 🌍 Scenario ] {context.feature.name} >> {context.scenario.name}')
+    print(f'[ 🍷 Error    ] {text}')
+    if extra_details is not None:
+        print(pretty(extra_details))
     assert False, "step failed"
 
 
 def log_fatal(context, text):
-    print(f'🌍 {context.feature.name} >> {context.scenario.name}')
-    print(f'[❌] FATAL 🍷 >> {text}')
+    print(f'[ 🌍 Scenario ] {context.feature.name} >> {context.scenario.name}')
+    print(f'[ 💥 Fatal    ] {text}')
     assert False, "error in the test itself"
+
+
+def pretty(data):
+    return json.dumps(data, sort_keys=True, indent=4)

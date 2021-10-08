@@ -28,6 +28,7 @@ class ApiClient:
                 'UniFyi-User-Id': self.context.user_id
             }
         )
+        return
 
     def post(self, url, identifiers):
         self.context.result = requests.post(
@@ -37,6 +38,7 @@ class ApiClient:
                 'UniFyi-User-Id': self.context.user_id
             }
         )
+        return
 
     def put(self, url, identifiers):
         self.context.result = requests.put(
@@ -46,6 +48,7 @@ class ApiClient:
                 'UniFyi-User-Id': self.context.user_id
             }
         )
+        return
 
     def delete(self, url, identifiers):
         self.context.result = requests.delete(
@@ -54,6 +57,7 @@ class ApiClient:
                 'UniFyi-User-Id': self.context.user_id
             }
         )
+        return
 
 
 class SimpleApiClient:

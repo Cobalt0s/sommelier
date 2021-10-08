@@ -8,6 +8,7 @@ class JsonRetriever:
         self.data = data
         # superficial path that records relative location to data
         self.path = path
+        self.root = self
 
     def __str__(self):
         return str(self.data)
@@ -15,8 +16,13 @@ class JsonRetriever:
     def __get(self, key):
         path = self.__create_path(key)
         if key in self.data:
-            return JsonRetriever(self.context, key, path)
-        log_error(self.context, f'{path} key is missing in json response')
+            return self.create_from_retriever(self.context, self.data[key], path)
+        log_error(self.context, f'{path} key is missing in json response', self.root.data)
+
+    def create_from_retriever(self, context, data, path):
+        copy = JsonRetriever(context, data, path)
+        copy.root = self.root
+        return copy
 
     def __create_path(self, key):
         if self.path == '':
@@ -48,11 +54,14 @@ class JsonRetriever:
         result = []
         arr = self.raw_array()
         for i in range(len(arr)):
-            result.append(JsonRetriever(self.context, arr[i], self.__create_path(f'[{i}]')))
+            result.append(self.create_from_retriever(self.context, arr[i], self.__create_path(f'[{i}]')))
         return result
 
     def has(self, key):
         return key in self.data
+
+    def raw(self):
+        return self.data
 
 
 def get_json(context):
@@ -60,6 +69,8 @@ def get_json(context):
         data = context.result.json()
         if data is None:
             raise KeyError
-        return JsonRetriever(context, data)
+        if isinstance(data, dict):
+            return JsonRetriever(context, data)
+        log_error(context, f'json is not an object, got: {data}')
     except Exception:
         log_error(context, 'json is missing in response')

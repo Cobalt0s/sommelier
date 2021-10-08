@@ -5,7 +5,7 @@ def assert_json_properties_in_object(context, json):
     for row in table_as_2d_list(context):
         zoom = row[0]
         expected_value = str(row[1])
-        given_value = json.get(zoom)
+        given_value = json.get(zoom).raw()
 
         assert expected_value == given_value, f"Expected {expected_value} given {given_value}"
 
