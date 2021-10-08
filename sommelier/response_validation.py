@@ -1,4 +1,7 @@
-from sommelier.utils import get_json, table_as_dict
+from sommelier.utils import (
+    get_json,
+    table_as_dict
+)
 from sommelier.utils.assertions import (
     assert_json_properties_in_object,
     assert_json_properties_in_list,
