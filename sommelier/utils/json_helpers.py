@@ -73,4 +73,4 @@ def get_json(context):
             return JsonRetriever(context, data)
         log_error(context, f'json is not an object, got: {data}')
     except Exception:
-        log_error(context, 'json is missing in response')
+        log_error(context, f'json is missing in response with status {context.result.status_code}')
