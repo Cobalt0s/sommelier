@@ -1,4 +1,4 @@
-from sommelier.utils.logger import log_error
+from sommelier.utils.logger import log_error, Judge
 
 
 class JsonRetriever:
@@ -41,14 +41,24 @@ class JsonRetriever:
         return given_value
 
     def raw_array(self):
-        if isinstance(self.data, list):
+        if isinstance(self.data, list) or self.data is None:
             return self.data
-        log_error(self.context, f'value of {self.path} in json response is not an array')
+        Judge(self.context).expectation(
+            False,
+            f'value of {self.path} in json response is not an array'
+        )
 
     def raw_str(self):
-        if isinstance(self.data, str):
-            return self.data
-        log_error(self.context, f'value of {self.path} in json response is not string')
+        if self.data is None:
+            return None
+        if isinstance(self.data, str) \
+                or isinstance(self.data, int) \
+                or isinstance(self.data, bool):
+            return str(self.data)
+        Judge(self.context).expectation(
+            False,
+            f'value of {self.path} in json response is not string'
+        )
 
     def retriever_array(self):
         result = []

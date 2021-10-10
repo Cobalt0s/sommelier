@@ -1,3 +1,5 @@
+from sommelier.utils.logger import Judge
+
 from sommelier.utils import get_json
 
 
@@ -13,7 +15,11 @@ class PaginationNavigator:
         self.context.pagination = {}
 
     def follow_next(self):
-        self.context.pagination = get_json(self.context).get('pagination').get('next')
+        self.context.pagination = get_json(self.context).get('pagination').get('next').raw_str()
 
     def assert_no_next_page(self):
-        assert get_json(self.context).get('pagination').get('next') is None, f"Next page actually is present"
+        Judge(self.context).expectation(
+            get_json(self.context).get('pagination').get('next').raw_str() is None,
+            f"Next page actually is present"
+        )
+

@@ -9,7 +9,7 @@ from sommelier.utils.assertions import (
 )
 from sommelier.utils.data_table_converter import column_list
 from sommelier.utils.list_lookup import context_contains, context_missing
-from sommelier.utils.logger import log_fatal, Judge
+from sommelier.utils.logger import Judge
 
 STATUS_CODES = {
     'OK': 200,
@@ -17,6 +17,7 @@ STATUS_CODES = {
     'NO CONTENT': 204,
     'BAD REQUEST': 400,
     'UNAUTHORIZED': 401,
+    'FORBIDDEN': 403,
     'NOT FOUND': 404,
     'CONFLICT': 409,
     'SERVER ERROR': 500,
@@ -132,9 +133,11 @@ class ResponseValidator(object):
         """
         assertion_func(self.context, get_json(self.context).get(item_key))
 
-
     def count_data(self, zoom, amount):
         amount = int(amount)
         elements = get_json(self.context).get(zoom).raw_array()
         size = len(elements)
-        assert amount == size, f"Expected {amount} elements on page, given {size}"
+        Judge(self.context).expectation(
+            amount == size,
+            f"Expected {amount} elements on page, given {size}"
+        )

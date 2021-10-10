@@ -10,13 +10,20 @@ class Judge:
         if not condition:
             extra_details = "No JSON"
             if hasattr(self.context.result, 'json'):
-                extra_details = self.context.result.json()
+                try:
+                    extra_details = self.context.result.json()
+                except Exception:
+                    pass
             log_error(self.context, message, extra_details)
 
     def assumption(self, condition, message):
         if not condition:
             log_fatal(self.context, message)
         assert True
+
+
+def log_info(context, text):
+    print(f'[ 🍷 Info     ] {text}')
 
 
 def log_error(context, text, extra_details=None):

@@ -22,11 +22,6 @@ def check_response_failure_code_and_details(context, code, details):
     response_validator.check_failure(code, details)
 
 
-@then('Missing required keys')
-def missing_required_keys(context):
-    response_validator.missing_keys()
-
-
 @then('Contains properties in response body')
 def contains_properties(context):
     response_validator.contains_data()
@@ -71,6 +66,11 @@ def define_uuids(context, definitions):
 @when('I use next page cursor')
 def prepare_to_use_pagination(context):
     pagination_navigator.follow_next()
+
+
+@when('I clear pagination parameters')
+def clear_pagination(context):
+    pagination_navigator.reset()
 
 
 @then('Next page does not exist')

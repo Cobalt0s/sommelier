@@ -21,9 +21,9 @@ def table_as_2d_list(context, position_of_value=1):
             value_result = []
             for x in value[1:-1].replace(', ', ',').split(','):
                 if x:
-                    value_result.append(resolve_id_or_tautology(context, x))
+                    value_result.append(parse_json_value(context, x))
         else:
-            value_result = resolve_id_or_tautology(context, value)
+            value_result = parse_json_value(context, value)
 
         key = item[0]
         if position_of_value == 1:
@@ -33,7 +33,24 @@ def table_as_2d_list(context, position_of_value=1):
     return result
 
 
+def parse_json_value(context, value):
+    if value == "True" or value == "true":
+        return True
+    if value == "False" or value == "false":
+        return False
+    return resolve_id_or_tautology(context, value)
+
+
+class CustomTable:
+
+    def __init__(self, rows):
+        self.rows = rows
+
+
 def _table_to_2d_list(table):
+    if isinstance(table, CustomTable):
+        return table.rows
+
     if table is None:
         return []
     result = [table.headings]

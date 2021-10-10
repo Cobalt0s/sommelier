@@ -1,7 +1,12 @@
 from uuid import uuid4
 
+from sommelier.utils.logger import Judge
+
 
 def create_alias(context, alias_id, identifier):
+    if context.flag_use_permanent_id is not None and context.flag_use_permanent_id:
+        # This alias should be persisted for the whole test execution and should not be reset
+        context.permanent_aliases[alias_id] = str(identifier)
     context.id_aliases[alias_id] = str(identifier)
 
 
@@ -11,11 +16,18 @@ def resolve_alias(context, alias_id):
         if identifier is not None:
             return identifier
 
-    raise Exception(f'Alias "{alias_id}" is not found since no id is associated with it')
+    # The assumption is that we never reach this code
+    Judge(context).assumption(
+        False,
+        f'Alias "{alias_id}" is not found since no id is associated with it',
+    )
 
 
 def clear_aliases(context):
     context.id_aliases = {}
+    if 'permanent_aliases' not in context:
+        context.permanent_aliases = {}
+    context.id_aliases = {**context.permanent_aliases}
 
 
 def resolve_id_or_tautology(context, item):
