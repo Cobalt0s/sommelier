@@ -5,6 +5,10 @@ import time
 from confluent_kafka import Consumer
 
 
+DRAIN_TIMEOUT = 5
+POLL_TIMEOUT = 5
+
+
 class EventConsumer:
 
     def __init__(self, host):
@@ -39,7 +43,7 @@ def drain_messages_from_kafka(c, num_messages, topic):
     messages = {}
     i = 0
     # Drain num_messages of messages from the topic
-    timeout = time.time() + 10
+    timeout = time.time() + DRAIN_TIMEOUT
     while i != num_messages:
         message, rtype = get_message_from_kafka(c)
         if rtype == "message":
@@ -58,7 +62,7 @@ def drain_messages_from_kafka(c, num_messages, topic):
 
 
 def get_message_from_kafka(c):
-    msg = c.poll(10)
+    msg = c.poll(POLL_TIMEOUT)
     if msg is None:
         return None, "finished"
     else:

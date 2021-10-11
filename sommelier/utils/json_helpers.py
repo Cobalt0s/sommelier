@@ -1,4 +1,4 @@
-from sommelier.utils.logger import log_error, Judge
+from sommelier.utils.logger import log_error, log_fatal, Judge
 
 
 class JsonRetriever:
@@ -15,9 +15,25 @@ class JsonRetriever:
 
     def __get(self, key):
         path = self.__create_path(key)
-        if key in self.data:
+
+        array_index = self.__to_array_index(key)
+        is_obj = array_index is None
+        is_arr = not is_obj
+
+        if is_obj and key in self.data:
             return self.create_from_retriever(self.context, self.data[key], path)
+        if is_arr and array_index <= len(self.data) - 1:
+            return self.create_from_retriever(self.context, self.data[array_index], path)
+
         log_error(self.context, f'{path} key is missing in json response', self.root.data)
+
+    def __to_array_index(self, key):
+        if key.startswith('[') and key.endswith(']'):
+            try:
+                return int(key.replace('[', '').replace(']', ''))
+            except Exception:
+                log_fatal(self.context, f'invalid array key {key}')
+        return None
 
     def create_from_retriever(self, context, data, path):
         copy = JsonRetriever(context, data, path)

@@ -2,8 +2,21 @@ from sommelier.events import EventConsumer, EventProducer
 from sommelier.utils import table_as_dict
 
 
+def sort_dict(obj):
+    for k in obj:
+        o = obj[k]
+        if isinstance(o, dict):
+            sort_dict(o)
+        if isinstance(o, list):
+            o.sort()
+
+
 def events_equal(expected_event, given_event):
-    return expected_event['payload'] == given_event
+
+    sort_dict(expected_event)
+    sort_dict(given_event)
+
+    return expected_event == given_event
 
 
 def validate_events_for_topic(event_registry, expected_events, topic):
@@ -13,7 +26,7 @@ def validate_events_for_topic(event_registry, expected_events, topic):
         match = False
         index_to_remove = None
         for i, given_event in given_events.items():
-            if events_equal(expected_event, given_event):
+            if events_equal(expected_event['payload'], given_event):
                 match = True
                 index_to_remove = i
                 break
@@ -51,11 +64,10 @@ class EventManager:
             'is_expected': is_expected,
             'payload': payload,
         })
-        if is_expected:
-            if topic_name in self.context.topics:
-                self.context.topics[topic_name] += 1
-            else:
-                self.context.topics[topic_name] = 1
+        if topic_name in self.context.topics:
+            self.context.topics[topic_name] += 1
+        else:
+            self.context.topics[topic_name] = 1
 
     def save_expected_event_with_payload(self, topic_name, topic_type, author_id, is_expected):
         self._save_expected_event(topic_name, is_expected, {
@@ -83,3 +95,6 @@ class EventManager:
     def produce_event(self, topic):
         message = table_as_dict(self.context)
         self.event_producer.send_message(topic, message)
+
+    def drain_events(self, topic):
+        self.event_consumer.consume(topic, -1)

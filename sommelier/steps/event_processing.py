@@ -1,4 +1,4 @@
-from behave import then, when
+from behave import then, when, given
 
 from features import event_manager
 
@@ -26,3 +26,8 @@ def event_production_is_expected(context):
 @when('Sending event to {topic} topic')
 def send_event(context, topic):
     event_manager.produce_event(topic)
+
+
+@given('Topic {topic} is drained')
+def drain_topic(context, topic):
+    event_manager.drain_events(topic)
