@@ -57,6 +57,11 @@ def save_item_id(context, item_id):
     identifier_registry.create_alias_from_response(item_id)
 
 
+@when('Save id located in {key} as {item_id}')
+def save_item_id_with_zoom(context, key, item_id):
+    identifier_registry.create_alias_from_response(item_id, key)
+
+
 @given('Define uuid for list {definitions}')
 def define_uuids(context, definitions):
     for d in definitions.replace(" ", "").split(","):

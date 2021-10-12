@@ -21,9 +21,12 @@ class ApiClient:
         return self.host_url + url.format(*resolved_ids)
 
     def get(self, url, identifiers):
-
+        self.context.requests_verb = "GET"
+        self.context.url = self.create_url(identifiers, url) + query_params(
+            self.context.pagination, table_as_dict(self.context)
+        )
         self.context.result = requests.get(
-            self.create_url(identifiers, url) + query_params(self.context.pagination, table_as_dict(self.context)),
+            self.context.url,
             headers={
                 'UniFyi-User-Id': self.context.user_id
             }
@@ -31,8 +34,10 @@ class ApiClient:
         return
 
     def post(self, url, identifiers):
+        self.context.requests_verb = "POST"
+        self.context.url = self.create_url(identifiers, url)
         self.context.result = requests.post(
-            self.create_url(identifiers, url),
+            self.context.url,
             json=table_as_dict(self.context),
             headers={
                 'UniFyi-User-Id': self.context.user_id
@@ -41,8 +46,10 @@ class ApiClient:
         return
 
     def put(self, url, identifiers):
+        self.context.requests_verb = "PUT"
+        self.context.url = self.create_url(identifiers, url)
         self.context.result = requests.put(
-            self.create_url(identifiers, url),
+            self.context.url,
             json=table_as_dict(self.context),
             headers={
                 'UniFyi-User-Id': self.context.user_id
@@ -51,8 +58,10 @@ class ApiClient:
         return
 
     def delete(self, url, identifiers):
+        self.context.requests_verb = "DELETE"
+        self.context.url = self.create_url(identifiers, url)
         self.context.result = requests.delete(
-            self.create_url(identifiers, url),
+            self.context.url,
             headers={
                 'UniFyi-User-Id': self.context.user_id
             }

@@ -1,3 +1,5 @@
+from sommelier.utils.logger import Judge, pretty
+
 from sommelier.events import EventConsumer, EventProducer
 from sommelier.utils import table_as_dict
 
@@ -19,7 +21,7 @@ def events_equal(expected_event, given_event):
     return expected_event == given_event
 
 
-def validate_events_for_topic(event_registry, expected_events, topic):
+def validate_events_for_topic(context, event_registry, expected_events, topic):
     given_events = event_registry[topic]
     for expected_event in expected_events:
 
@@ -36,7 +38,11 @@ def validate_events_for_topic(event_registry, expected_events, topic):
 
         is_expected = expected_event['is_expected']
         error_message = 'Expected' if is_expected else 'Not expected but present'
-        assert is_expected == match, f"{error_message} event '{expected_event['payload']}'\nBut given{given_events}"
+        Judge(context).expectation(
+            is_expected == match,
+            f"{error_message} event '{pretty(expected_event['payload'])}'",
+            given_events
+        )
 
 
 class EventManager:
@@ -79,17 +85,17 @@ class EventManager:
     def save_expected_event(self, topic_name, is_expected):
         self._save_expected_event(topic_name, is_expected, table_as_dict(self.context))
 
-    def _collect_events(self):
+    def _collect_events(self, drain_timeout=None):
         event_registry = {}
         for topic, num_messages in self.context.topics.items():
-            event_registry[topic] = (self.event_consumer.consume(topic, num_messages))
+            event_registry[topic] = (self.event_consumer.consume(topic, num_messages, drain_timeout))
         return event_registry
 
-    def validate_expected_events(self):
-        event_registry = self._collect_events()
+    def validate_expected_events(self, drain_timeout=None):
+        event_registry = self._collect_events(drain_timeout)
         
         for topic, expected_events in self.context.events.items():
-            validate_events_for_topic(event_registry, expected_events, topic)
+            validate_events_for_topic(self.context, event_registry, expected_events, topic)
         self.context.events = {}
 
     def produce_event(self, topic):

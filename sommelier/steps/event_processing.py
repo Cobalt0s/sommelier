@@ -23,6 +23,11 @@ def event_production_is_expected(context):
     event_manager.validate_expected_events()
 
 
+@then('Assert events arrived with timeout {timeout}')
+def event_production_is_expected_with_timeout(context, timeout):
+    event_manager.validate_expected_events(timeout)
+
+
 @when('Sending event to {topic} topic')
 def send_event(context, topic):
     event_manager.produce_event(topic)

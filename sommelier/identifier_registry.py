@@ -1,3 +1,5 @@
+from sommelier.utils.logger import Judge
+
 from sommelier.utils import get_json
 from sommelier.utils.identifier_resolver import resolve_alias, create_alias, clear_aliases
 
@@ -14,15 +16,20 @@ class IdentifierRegistry:
         clear_aliases(self.context)
         self.context.user_id = None
 
-    def create_alias_from_response(self, alias_id):
+    def create_alias_from_response(self, alias_id, key=None):
         # Try to get id from the last response data
         code = self.context.result.status_code
+
+        Judge(self.context).expectation(
+            code < 300,
+            f'Response is not ok "{code}", cannot extract id',
+        )
+
         json = get_json(self.context)
-        if code >= 300:
-            raise Exception(f'Response is not ok "{code}", cannot extract id {json}')
-        if not json.get('id'):
-            raise Exception(f'Response is missing id {json}')
-        create_alias(self.context, alias_id, json.get('id'))
+        if key is not None:
+            create_alias(self.context, alias_id, json.get(key))
+        else:
+            create_alias(self.context, alias_id, json.get('id'))
 
     def create_alias(self, alias_id, identifier):
         create_alias(self.context, alias_id, identifier)

@@ -22,7 +22,7 @@ class EventConsumer:
         handler.setFormatter(logging.Formatter('%(asctime)-15s %(levelname)-8s %(message)s'))
         self.logger.addHandler(handler)
 
-    def consume(self, topic, num_messages):
+    def consume(self, topic, num_messages, drain_timeout=None):
         # Create Consumer instance
         # Hint: try debug='fetch' to generate some log messages
         c = Consumer({
@@ -33,17 +33,18 @@ class EventConsumer:
 
         # Subscribe to topics
         c.subscribe([topic])
-        messages = drain_messages_from_kafka(c, num_messages, topic)
+        messages = drain_messages_from_kafka(c, num_messages, topic, drain_timeout)
         c.close()
 
         return messages
 
 
-def drain_messages_from_kafka(c, num_messages, topic):
+def drain_messages_from_kafka(c, num_messages, topic, drain_timeout=None):
     messages = {}
     i = 0
+    drain_timeout = DRAIN_TIMEOUT if drain_timeout is None else drain_timeout
     # Drain num_messages of messages from the topic
-    timeout = time.time() + DRAIN_TIMEOUT
+    timeout = time.time() + drain_timeout
     while i != num_messages:
         message, rtype = get_message_from_kafka(c)
         if rtype == "message":
