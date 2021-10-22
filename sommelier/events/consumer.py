@@ -6,7 +6,7 @@ from confluent_kafka import Consumer
 
 
 DRAIN_TIMEOUT = 5
-POLL_TIMEOUT = 5
+POLL_TIMEOUT = 10
 
 
 class EventConsumer:

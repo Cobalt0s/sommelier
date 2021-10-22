@@ -38,6 +38,8 @@ def validate_events_for_topic(context, event_registry, expected_events, topic):
 
         is_expected = expected_event['is_expected']
         error_message = 'Expected' if is_expected else 'Not expected but present'
+        context.requests_verb = "CONSUME"
+        context.url = topic
         Judge(context).expectation(
             is_expected == match,
             f"{error_message} event '{pretty(expected_event['payload'])}'",
