@@ -6,18 +6,19 @@ class Judge:
     def __init__(self, context):
         self.context = context
 
-    def expectation(self, condition, message, extra_details=None):
+    def expectation(self, condition, message, extra_details=None, api_enhancements=True):
         if condition:
             return
-        log_info(self.context, f'Request {self.context.requests_verb} {self.context.url}')
 
-        if extra_details is None:
-            extra_details = "No JSON"
-            if hasattr(self.context.result, 'json'):
-                try:
-                    extra_details = self.context.result.json()
-                except Exception:
-                    pass
+        if api_enhancements:
+            log_info(self.context, f'Request {self.context.requests_verb} {self.context.url}')
+            if extra_details is None:
+                extra_details = "No JSON"
+                if hasattr(self.context.result, 'json'):
+                    try:
+                        extra_details = self.context.result.json()
+                    except Exception:
+                        pass
 
         log_error(self.context, message, extra_details)
 
@@ -40,7 +41,7 @@ def log_error(context, text, extra_details=None):
     log_header(context)
     print(f'[ 🍷 Error    ] {text}')
     if extra_details is not None:
-        print(pretty(extra_details))
+        print(pretty(context, extra_details))
     assert False, "step failed"
 
 
@@ -50,5 +51,33 @@ def log_fatal(context, text):
     assert False, "error in the test itself"
 
 
-def pretty(data):
-    return json.dumps(data, sort_keys=True, indent=4)
+def pretty(context, data):
+    if isinstance(data, dict):
+        __resolve_dict(context, data)
+    return json.dumps(data, ensure_ascii=False, sort_keys=True, indent=4)
+
+
+def __find_alias(context, value):
+    for k in context.id_aliases:
+        v = context.id_aliases[k]
+        if v == value:
+            return f'🍹{k} ({v})'
+    return value
+
+
+def __resolve_list(context, arr):
+    result = []
+    for i in arr:
+        result[i] = __find_alias(context, arr[i])
+    return result
+
+
+def __resolve_dict(context, data):
+    for k in data:
+        v = data[k]
+        if isinstance(v, dict):
+            __resolve_dict(context, v)
+        elif isinstance(v, list):
+            data[k] = __resolve_list(context, v)
+        else:
+            data[k] = __find_alias(context, v)
