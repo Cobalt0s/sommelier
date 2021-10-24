@@ -67,8 +67,8 @@ def __find_alias(context, value):
 
 def __resolve_list(context, arr):
     result = []
-    for i in arr:
-        result[i] = __find_alias(context, arr[i])
+    for v in arr:
+        result.append(__find_alias(context, v))
     return result
 
 
