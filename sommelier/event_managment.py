@@ -42,7 +42,7 @@ def validate_events_for_topic(context, event_registry, expected_events, topic):
         context.url = topic
         Judge(context).expectation(
             is_expected == match,
-            f"{error_message} event '{pretty(context, expected_event['payload'])}'",
+            f"{error_message} event '{pretty(expected_event['payload'])}'",
             given_events
         )
 
@@ -106,14 +106,3 @@ class EventManager:
 
     def drain_events(self, topic):
         self.event_consumer.consume(topic, -1)
-
-    def skip_events(self, topic, num_messages):
-        num_messages = int(num_messages)
-        events = self.event_consumer.consume(topic, num_messages, None)
-        received_num_messages = len(events)
-        Judge(self.context).expectation(
-            received_num_messages == num_messages,
-            f"Expected to skip {num_messages} while got {received_num_messages} events '{pretty(self.context, events)}'",
-            api_enhancements=False
-        )
-
