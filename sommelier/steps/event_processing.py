@@ -36,3 +36,8 @@ def send_event(context, topic):
 @given('Topic {topic} is drained')
 def drain_topic(context, topic):
     event_manager.drain_events(topic)
+
+
+@when('Skip {num_events} events in topic {topic}')
+def skip_events_in_topic(context, num_events, topic):
+    event_manager.skip_events(topic, num_events)
