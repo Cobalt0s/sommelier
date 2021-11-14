@@ -1,3 +1,5 @@
+import copy
+
 from sommelier.utils.logger import Judge, pretty
 
 from sommelier.events import EventConsumer, EventProducer
@@ -14,11 +16,20 @@ def sort_dict(obj):
 
 
 def events_equal(expected_event, given_event):
+    a = copy.deepcopy(expected_event)
+    b = copy.deepcopy(given_event)
 
-    sort_dict(expected_event)
-    sort_dict(given_event)
+    # ignore tracing information that may come with event
+    # effectively we are making comparison of every other field
+    if 'trace' in a:
+        del a['trace']
+    if 'trace' in b:
+        del b['trace']
 
-    return expected_event == given_event
+    sort_dict(a)
+    sort_dict(b)
+
+    return a == b
 
 
 def validate_events_for_topic(context, event_registry, expected_events, topic):
