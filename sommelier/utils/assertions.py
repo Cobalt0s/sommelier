@@ -1,4 +1,4 @@
-from sommelier.utils.logger import Judge
+from sommelier.logging import Judge
 
 from sommelier.utils.data_table_converter import table_as_2d_list
 

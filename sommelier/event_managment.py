@@ -1,6 +1,6 @@
 import copy
 
-from sommelier.utils.logger import Judge, pretty
+from sommelier.logging import Judge, pretty
 
 from sommelier.events import EventConsumer, EventProducer
 from sommelier.utils import table_as_dict

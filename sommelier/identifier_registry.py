@@ -1,4 +1,4 @@
-from sommelier.utils.logger import Judge
+from sommelier.logging import Judge
 
 from sommelier.utils import get_json
 from sommelier.utils.identifier_resolver import resolve_alias, create_alias, clear_aliases

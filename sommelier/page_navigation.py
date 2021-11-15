@@ -1,4 +1,4 @@
-from sommelier.utils.logger import Judge
+from sommelier.logging import Judge
 
 from sommelier.utils import get_json
 

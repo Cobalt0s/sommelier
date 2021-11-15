@@ -1,9 +1,11 @@
 from uuid import uuid4
 
-from sommelier.utils.logger import Judge, log_info
+from sommelier.logging import Judge, log_info
 
 
 def create_alias(context, alias_id, identifier):
+    if "flag_use_permanent_id" not in context:
+        context.flag_use_permanent_id = None
     if context.flag_use_permanent_id is not None and context.flag_use_permanent_id:
         # This alias should be persisted for the whole test execution and should not be reset
         context.permanent_aliases[alias_id] = str(identifier)

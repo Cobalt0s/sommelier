@@ -1,4 +1,4 @@
-from sommelier.utils.logger import log_error, log_fatal, Judge
+from sommelier.logging import log_error, log_fatal, Judge
 
 
 class JsonRetriever:

@@ -1,5 +1,5 @@
 from sommelier.utils import get_json
-from sommelier.utils.logger import Judge
+from sommelier.logging import Judge
 
 
 def context_contains(context, first_key, second_key, value):

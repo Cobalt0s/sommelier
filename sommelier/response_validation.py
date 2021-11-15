@@ -9,7 +9,7 @@ from sommelier.utils.assertions import (
 )
 from sommelier.utils.data_table_converter import column_list
 from sommelier.utils.list_lookup import context_contains, context_missing
-from sommelier.utils.logger import Judge
+from sommelier.logging import Judge
 
 STATUS_CODES = {
     'OK': 200,

@@ -1,9 +1,8 @@
+import json
 import logging
-import ast
 import time
 
 from confluent_kafka import Consumer
-
 
 DRAIN_TIMEOUT = 5
 POLL_TIMEOUT = 10
@@ -79,7 +78,6 @@ def get_message_from_kafka(c):
             decoded_value = msg.value().decode("utf-8")
             if msg.key() is None:
                 return None, "heartbeat"
-            # print(decoded_value)
-            value = ast.literal_eval(decoded_value)
-            # print(value)
+
+            value = json.loads(decoded_value)
             return value, "message"
