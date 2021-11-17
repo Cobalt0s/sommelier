@@ -4,6 +4,7 @@ from sommelier.logging import log_error, log_fatal, Judge
 class JsonRetriever:
 
     def __init__(self, context, data, path=''):
+        # TODO what if self.data is NONE, how every method behaves
         self.context = context
         self.data = data
         # superficial path that records relative location to data
