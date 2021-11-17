@@ -72,7 +72,7 @@ def __resolve_list(context, arr):
             __resolve_dict(context, v)
             result.append(v)
         else:
-            result.append(__resolve_dict(context, v))
+            result.append(__find_alias(context, v))
     return result
 
 
