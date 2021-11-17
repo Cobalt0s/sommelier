@@ -21,10 +21,11 @@ class JsonRetriever:
         is_obj = array_index is None
         is_arr = not is_obj
 
-        if is_obj and key in self.data:
-            return self.create_from_retriever(self.context, self.data[key], path)
-        if is_arr and array_index <= len(self.data) - 1:
-            return self.create_from_retriever(self.context, self.data[array_index], path)
+        if self.data is not None:
+            if is_obj and key in self.data:
+                return self.create_from_retriever(self.context, self.data[key], path)
+            if is_arr and array_index <= len(self.data) - 1:
+                return self.create_from_retriever(self.context, self.data[array_index], path)
 
         log_error(self.context, f'{path} key is missing in json response', self.root.data)
 

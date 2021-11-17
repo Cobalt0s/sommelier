@@ -38,6 +38,8 @@ def parse_json_value(context, value):
         return True
     if value == "False" or value == "false":
         return False
+    if value == "None" or value.lower() == "null":
+        return None
     return resolve_id_or_tautology(context, value)
 
 
