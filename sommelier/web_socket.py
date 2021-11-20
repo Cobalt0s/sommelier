@@ -6,14 +6,14 @@ from sommelier.utils.assertions import require_var
 
 class WsSocketManager:
 
-    def __init__(self, host, port, ws_host, ws_port):
-        require_var(host, "host")
-        require_var(port, "port")
-        require_var(ws_host, "ws_host")
-        require_var(ws_port, "ws_port")
-        self.host_url = f'http://{host}:{port}'
-        self.ws_host = ws_host
-        self.ws_port = ws_port
+    def __init__(self, wsm_host, wsm_port, svc_host, svc_port):
+        require_var(wsm_host, "host")
+        require_var(wsm_port, "port")
+        require_var(svc_host, "ws_host")
+        require_var(svc_port, "ws_port")
+        self.host_url = f'http://{wsm_host}:{wsm_port}'
+        self.svc_host = svc_host
+        self.svc_port = svc_port
         self.context = None
 
     def set_context(self, context):
@@ -24,8 +24,8 @@ class WsSocketManager:
         self.context.result = requests.post(
             f'{self.host_url}/sockets',
             json={
-                "host": self.ws_host,
-                "port": self.ws_port,
+                "host": self.svc_host,
+                "port": self.svc_port,
                 "name": ws_name,
                 "cookie": cookie,
                 "topics": topics
