@@ -1,4 +1,5 @@
 from sommelier.utils.identifier_resolver import resolve_id_or_tautology
+from sommelier.utils.string_manipulations import StringUtils
 
 
 def column_list(context):
@@ -17,9 +18,10 @@ def table_as_2d_list(context, position_of_value=1):
     result = []
     for item in list_2d:
         value = item[position_of_value]
-        if value.startswith('[') and value.endswith(']'):
+        if StringUtils.is_array(value):
             value_result = []
-            for x in value[1:-1].replace(', ', ',').split(','):
+            arr = StringUtils.extract_array(value)
+            for x in StringUtils.comma_separated_to_list(arr):
                 if x:
                     value_result.append(parse_json_value(context, x))
         else:

@@ -44,3 +44,8 @@ def _bool_operation(use_or):
     if use_or:
         return lambda x, y: x or y
     return lambda x, y: x and y
+
+
+def require_var(variable, name):
+    if variable is None:
+        raise Exception(f"var {name} is not set")

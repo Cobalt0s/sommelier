@@ -1,4 +1,5 @@
 from sommelier.logging import log_error, log_fatal, Judge
+from sommelier.utils.string_manipulations import StringUtils
 
 
 class JsonRetriever:
@@ -30,9 +31,9 @@ class JsonRetriever:
         log_error(self.context, f'{path} key is missing in json response', self.root.data)
 
     def __to_array_index(self, key):
-        if key.startswith('[') and key.endswith(']'):
+        if StringUtils.is_array(key):
             try:
-                return int(key.replace('[', '').replace(']', ''))
+                return int(StringUtils.extract_array(key))
             except Exception:
                 log_fatal(self.context, f'invalid array key {key}')
         return None

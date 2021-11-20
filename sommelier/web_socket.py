@@ -1,11 +1,16 @@
 import requests
 
 from sommelier.utils import table_as_dict
+from sommelier.utils.assertions import require_var
 
 
 class WsSocketManager:
 
     def __init__(self, host, port, ws_host, ws_port):
+        require_var(host, "host")
+        require_var(port, "port")
+        require_var(ws_host, "ws_host")
+        require_var(ws_port, "ws_port")
         self.host_url = f'http://{host}:{port}'
         self.ws_host = ws_host
         self.ws_port = ws_port
@@ -15,6 +20,7 @@ class WsSocketManager:
         self.context = context
 
     def create_socket(self, ws_name, cookie, topics):
+
         self.context.result = requests.post(
             f'{self.host_url}/sockets',
             json={

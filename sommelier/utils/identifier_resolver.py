@@ -1,6 +1,5 @@
-from uuid import uuid4
-
 from sommelier.logging import Judge, log_info
+from sommelier.utils.string_manipulations import StringUtils
 
 
 def create_alias(context, alias_id, identifier):
@@ -34,11 +33,8 @@ def clear_aliases(context):
 
 
 def resolve_id_or_tautology(context, item):
-    if item.startswith('$'):
-        item = item[1:]
-        if item.startswith('#'):
-            # Generate Id
-            return str(uuid4())
+    if StringUtils.is_variable(item):
+        item = StringUtils.extract_variable(item)
         return resolve_alias(context, item)
 
     return item

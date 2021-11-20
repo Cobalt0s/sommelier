@@ -5,6 +5,7 @@ from behave import given, then, when
 
 from sommelier import response_validator, pagination_navigator, identifier_registry
 from sommelier.utils import get_json
+from sommelier.utils.string_manipulations import StringUtils
 
 
 @then('Response status is {status}')
@@ -64,7 +65,7 @@ def save_item_id_with_zoom(context, key, item_id):
 
 @given('Define uuid for list {definitions}')
 def define_uuids(context, definitions):
-    for d in definitions.replace(" ", "").split(","):
+    for d in StringUtils.comma_separated_to_list(definitions):
         identifier_registry.create_alias(d, str(uuid4()))
 
 
