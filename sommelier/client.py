@@ -10,9 +10,22 @@ class ApiClient:
         self.context = None
         self.host_url = f'http://{host_url}'
         self.identifier_registry = identifier_registry
+        self.is_cookie_header = False
 
     def set_context(self, context):
         self.context = context
+
+    def use_cookie_header(self):
+        self.is_cookie_header = True
+
+    def get_headers(self):
+        if self.is_cookie_header:
+            return {
+                'Cookie': f"UNIFYI_AUTH_TOKEN={self.context.user_id}"
+            }
+        return {
+            'UniFyi-User-Id': self.context.user_id
+        }
 
     def create_url(self, identifiers, url):
         resolved_ids = []
@@ -27,9 +40,7 @@ class ApiClient:
         )
         self.context.result = requests.get(
             self.context.url,
-            headers={
-                'UniFyi-User-Id': self.context.user_id
-            }
+            headers=self.get_headers()
         )
         return
 
@@ -39,9 +50,7 @@ class ApiClient:
         self.context.result = requests.post(
             self.context.url,
             json=table_as_dict(self.context),
-            headers={
-                'UniFyi-User-Id': self.context.user_id
-            }
+            headers=self.get_headers()
         )
         return
 
@@ -51,9 +60,7 @@ class ApiClient:
         self.context.result = requests.put(
             self.context.url,
             json=table_as_dict(self.context),
-            headers={
-                'UniFyi-User-Id': self.context.user_id
-            }
+            headers=self.get_headers()
         )
         return
 
@@ -62,9 +69,7 @@ class ApiClient:
         self.context.url = self.create_url(identifiers, url)
         self.context.result = requests.delete(
             self.context.url,
-            headers={
-                'UniFyi-User-Id': self.context.user_id
-            }
+            headers=self.get_headers()
         )
         return
 
