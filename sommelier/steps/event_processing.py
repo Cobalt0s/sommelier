@@ -2,6 +2,8 @@ from behave import then, when, given
 
 from features import event_manager
 
+from sommelier.utils.string_manipulations import StringUtils
+
 
 @then('Event on topic {topic_name} is expected to be emitted')
 def event_production_is_expected(context, topic_name):
@@ -23,9 +25,21 @@ def event_production_is_expected(context):
     event_manager.validate_expected_events()
 
 
+@then('Assert events arrived ignoring {ignored}')
+def event_production_is_expected_with_timeout_ignoring(context, ignored):
+    ignored_keys = StringUtils.comma_separated_to_list(ignored)
+    event_manager.validate_expected_events(ignored_keys=ignored_keys)
+
+
 @then('Assert events arrived with timeout {timeout}')
 def event_production_is_expected_with_timeout(context, timeout):
-    event_manager.validate_expected_events(timeout)
+    event_manager.validate_expected_events(drain_timeout=timeout)
+
+
+@then('Assert events arrived while ignoring {ignored} with timeout {timeout}')
+def event_production_is_expected_with_timeout_ignoring(context, ignored, timeout):
+    ignored_keys = StringUtils.comma_separated_to_list(ignored)
+    event_manager.validate_expected_events(drain_timeout=timeout, ignored_keys=ignored_keys)
 
 
 @when('Sending event to {topic} topic')

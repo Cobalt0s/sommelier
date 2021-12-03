@@ -6,6 +6,10 @@ class StringUtils:
         return text.replace(" ", "").split(",")
 
     @staticmethod
+    def dot_separated_to_list(text):
+        return [x for x in f"{text}.".split('.')][:-1]
+
+    @staticmethod
     def is_array(text):
         return text.startswith('[') and text.endswith(']')
 

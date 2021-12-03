@@ -1,45 +1,43 @@
 import copy
 
+from sommelier.utils.json_helpers import JsonRetriever
+
 from sommelier.logging import Judge, pretty
 
 from sommelier.events import EventConsumer, EventProducer
 from sommelier.utils import table_as_dict
 
 
-def sort_dict(obj):
-    for k in obj:
-        o = obj[k]
-        if isinstance(o, dict):
-            sort_dict(o)
-        if isinstance(o, list):
-            o.sort()
+def events_equal(context, expected_event, given_event, ignored_keys=None):
+    a = JsonRetriever(context, copy.deepcopy(expected_event))
+    b = JsonRetriever(context, copy.deepcopy(given_event))
 
-
-def events_equal(expected_event, given_event):
-    a = copy.deepcopy(expected_event)
-    b = copy.deepcopy(given_event)
+    if ignored_keys is None:
+        ignored_keys = []
 
     # ignore tracing information that may come with event
     # effectively we are making comparison of every other field
-    if 'trace' in a:
-        del a['trace']
-    if 'trace' in b:
-        del b['trace']
+    ignored_keys.append('trace')
 
-    sort_dict(a)
-    sort_dict(b)
+    for i in range(len(ignored_keys)):
+        key = ignored_keys[i]
+        a.delete(key)
+        b.delete(key)
 
-    return a == b
+    a.sort()
+    b.sort()
+
+    return a.raw() == b.raw()
 
 
-def validate_events_for_topic(context, event_registry, expected_events, topic):
+def validate_events_for_topic(context, event_registry, expected_events, topic, ignored_keys=None):
     given_events = event_registry[topic]
     for expected_event in expected_events:
 
         match = False
         index_to_remove = None
         for i, given_event in given_events.items():
-            if events_equal(expected_event['payload'], given_event):
+            if events_equal(context, expected_event['payload'], given_event, ignored_keys):
                 match = True
                 index_to_remove = i
                 break
@@ -104,11 +102,11 @@ class EventManager:
             event_registry[topic] = (self.event_consumer.consume(topic, num_messages, drain_timeout))
         return event_registry
 
-    def validate_expected_events(self, drain_timeout=None):
+    def validate_expected_events(self, drain_timeout=None, ignored_keys=None):
         event_registry = self._collect_events(drain_timeout)
         
         for topic, expected_events in self.context.events.items():
-            validate_events_for_topic(self.context, event_registry, expected_events, topic)
+            validate_events_for_topic(self.context, event_registry, expected_events, topic, ignored_keys)
         self.context.events = {}
 
     def produce_event(self, topic):

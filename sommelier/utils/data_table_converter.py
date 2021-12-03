@@ -13,7 +13,7 @@ def table_as_dict(context):
 
 
 def table_as_2d_list(context, position_of_value=1):
-    list_2d = _table_to_2d_list(context.table)
+    list_2d = _table_to_2d_list(get_table(context))
 
     result = []
     for item in list_2d:
@@ -45,6 +45,21 @@ def parse_json_value(context, value):
     return resolve_id_or_tautology(context, value)
 
 
+def get_table(context):
+    if "payload" in context and context.payload is not None:
+        table = []
+        for k in context.payload:
+            v = context.payload[k]
+            if isinstance(v, dict):
+                raise Exception("nested dictionaries for context.payload is not supported")
+            table.append([k, v])
+        # Clear the payload variable as it is temporary passed for side effects
+        context.payload = None
+        return CustomTable(table)
+    return context.table
+
+
+# THIS IS DEPRECATED from the direct use
 class CustomTable:
 
     def __init__(self, rows):
