@@ -57,7 +57,7 @@ def pretty(context, data):
     return json.dumps(data, ensure_ascii=False, sort_keys=True, indent=4)
 
 
-def __find_alias(context, value):
+def find_alias(context, value):
     for k in context.id_aliases:
         v = context.id_aliases[k]
         if v == value:
@@ -72,7 +72,7 @@ def __resolve_list(context, arr):
             __resolve_dict(context, v)
             result.append(v)
         else:
-            result.append(__find_alias(context, v))
+            result.append(find_alias(context, v))
     return result
 
 
@@ -84,4 +84,4 @@ def __resolve_dict(context, data):
         elif isinstance(v, list):
             data[k] = __resolve_list(context, v)
         else:
-            data[k] = __find_alias(context, v)
+            data[k] = find_alias(context, v)

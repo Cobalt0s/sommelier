@@ -1,5 +1,5 @@
 from sommelier.utils import get_json
-from sommelier.logging import Judge
+from sommelier.logging import Judge, find_alias
 
 
 def context_contains(context, first_key, second_key, value):
@@ -24,7 +24,7 @@ def _list_search(context, item_list, key, value, expected_to_find=True):
     found = False
     for item in item_list:
         if key in item:
-            found = item[key] == value
+            found = item[key] == find_alias(context, value)
             if found:
                 break
 
