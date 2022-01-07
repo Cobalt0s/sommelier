@@ -24,7 +24,7 @@ def _list_search(context, item_list, key, value, expected_to_find=True):
     found = False
     for item in item_list:
         if key in item:
-            found = item[key] == find_alias(context, value)
+            found = item[key] == value
             if found:
                 break
 
@@ -32,7 +32,7 @@ def _list_search(context, item_list, key, value, expected_to_find=True):
 
     Judge(context).expectation(
         found == expected_to_find,
-        f"Entry ('{key}': '{value}') {found_text}",
+        f"Entry ['{key}': '{find_alias(context, value)}'] {found_text}",
     )
 
 
