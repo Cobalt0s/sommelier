@@ -1,4 +1,4 @@
-from sommelier.logging import Judge
+from sommelier.logging import Judge, find_alias
 
 from sommelier.utils.data_table_converter import table_as_2d_list
 
@@ -11,7 +11,7 @@ def assert_json_properties_in_object(context, json):
 
         Judge(context).expectation(
             expected_value == given_value,
-            f"Expected {expected_value} given {given_value} for key {zoom}",
+            f"Expected {find_alias(context, expected_value)} given {find_alias(context, given_value)} for key {zoom}",
         )
 
 
@@ -36,7 +36,7 @@ def _assert_json_properties_in_list(context, json, contains):
 
         Judge(context).expectation(
             assertion_flag,
-            f"Expected {expected_value} was not find inside {zoom}",
+            f"Expected {find_alias(context, expected_value)} was not found inside {zoom}",
         )
 
 
