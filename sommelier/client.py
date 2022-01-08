@@ -24,9 +24,12 @@ class ApiClient:
                 'Cookie': f"UNIFYI_AUTH_TOKEN={self.context.user_id}"
             }
         user_id = self.context.user_id
+        role = '0'
+        if user_id in self.context.roles:
+            role = self.context.roles[user_id]
         return {
             'UniFyi-User-Id': user_id,
-            'UniFyi-Role': self.context.roles[user_id]
+            'UniFyi-Role': role
         }
 
     def create_url(self, identifiers, url):

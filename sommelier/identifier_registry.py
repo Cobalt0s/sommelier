@@ -17,7 +17,7 @@ class IdentifierRegistry:
     def reset(self):
         clear_aliases(self.context)
         self.context.user_id = None
-        self.context.roles = {None: '0'}
+        self.context.roles = {}
 
     def create_alias_from_response(self, alias_id, key=None):
         # Try to get id from the last response data
