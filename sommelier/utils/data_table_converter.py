@@ -47,7 +47,7 @@ def parse_json_value(context, value):
 
 
 def get_table(context):
-    if DictUtils.is_assigned(context, "payload"):
+    if "payload" in context and context.payload is not None:
         table = []
         for k in context.payload:
             v = context.payload[k]
