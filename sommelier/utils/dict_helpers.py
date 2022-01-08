@@ -12,4 +12,4 @@ class DictUtils:
     @staticmethod
     def declare(obj, key, value):
         if not DictUtils.is_declared(obj, key):
-            obj[key] = value
+            setattr(obj, key, value)
