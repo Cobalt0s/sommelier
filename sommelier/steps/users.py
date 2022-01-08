@@ -10,7 +10,7 @@ def select_user(context, user_name):
 
 @given('Grant user {user_name} role {role}')
 def grant_role(context, user_name, role):
-    role_num = 0
+    role_num = '0'
     if role == 'admin':
-        role_num = 1
+        role_num = '1'
     identifier_registry.grant_user_role(user_name, role_num)
