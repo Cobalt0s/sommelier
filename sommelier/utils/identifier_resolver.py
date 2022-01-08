@@ -1,3 +1,5 @@
+from sommelier.utils.dict_helpers import DictUtils
+
 from sommelier.logging import Judge, log_info
 from sommelier.utils.string_manipulations import StringUtils
 
@@ -27,8 +29,7 @@ def resolve_alias(context, alias_id):
 
 def clear_aliases(context):
     context.id_aliases = {}
-    if 'permanent_aliases' not in context:
-        context.permanent_aliases = {}
+    DictUtils.declare(context, 'permanent_aliases', {})
     context.id_aliases = {**context.permanent_aliases}
 
 

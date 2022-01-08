@@ -1,3 +1,5 @@
+from sommelier.utils.dict_helpers import DictUtils
+
 from sommelier.logging import Judge
 
 from sommelier.utils import get_json
@@ -15,6 +17,7 @@ class IdentifierRegistry:
     def reset(self):
         clear_aliases(self.context)
         self.context.user_id = None
+        self.context.roles = {}
 
     def create_alias_from_response(self, alias_id, key=None):
         # Try to get id from the last response data
@@ -40,3 +43,6 @@ class IdentifierRegistry:
     def select_user(self, user_alias):
         self.context.user_id = resolve_alias(self.context, user_alias)
 
+    def grant_user_role(self, user_alias, role):
+        user_id = resolve_alias(self.context, user_alias)
+        self.context.roles[user_id] = role

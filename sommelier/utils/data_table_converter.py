@@ -1,3 +1,4 @@
+from sommelier.utils.dict_helpers import DictUtils
 from sommelier.utils.identifier_resolver import resolve_id_or_tautology
 from sommelier.utils.string_manipulations import StringUtils
 
@@ -46,7 +47,7 @@ def parse_json_value(context, value):
 
 
 def get_table(context):
-    if "payload" in context and context.payload is not None:
+    if DictUtils.is_assigned(context, "payload"):
         table = []
         for k in context.payload:
             v = context.payload[k]
