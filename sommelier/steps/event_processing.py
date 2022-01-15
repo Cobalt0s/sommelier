@@ -52,6 +52,11 @@ def drain_topic(context, topic):
     event_manager.drain_events(topic)
 
 
+@then('Topic {topic} must be empty')
+def topic_must_be_empty(context, topic):
+    event_manager.must_be_empty(topic)
+
+
 @when('Skip {num_events} events in topic {topic}')
 def skip_events_in_topic(context, num_events, topic):
     event_manager.skip_events(topic, num_events)

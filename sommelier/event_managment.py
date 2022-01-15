@@ -116,6 +116,12 @@ class EventManager:
     def drain_events(self, topic):
         self.event_consumer.consume(topic, -1)
 
+    def must_be_empty(self, topic):
+        messages = self.event_consumer.consume(topic, -1, drain_timeout=1)
+        empty = len(messages) == 0
+        if not empty:
+            self.drain_events(topic)
+
     def skip_events(self, topic, num_messages):
         num_messages = int(num_messages)
         events = self.event_consumer.consume(topic, num_messages, None)

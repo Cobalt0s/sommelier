@@ -48,11 +48,6 @@ def count_elements_on_page(context, zoom, amount):
     response_validator.count_data(zoom, amount)
 
 
-@then('Data array contains element')
-def data_array_contains_element(context):
-    response_validator.contains_data_in_array()
-
-
 @when('Save id as {item_id}')
 def save_item_id(context, item_id):
     identifier_registry.create_alias_from_response(item_id)
