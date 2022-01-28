@@ -81,7 +81,13 @@ def next_page_missing(context):
 
 @when('After waiting for {duration} seconds')
 def wait_time(context, duration):
-    time.sleep(int(duration))
+    time.sleep(float(duration))
+
+
+@when('After waiting for {duration} ms')
+def wait_ms(context, duration):
+    ms = float(duration)
+    wait_time(context, ms * 0.001)
 
 
 @when('Selecting one of the objects and saving as {item_id}')
