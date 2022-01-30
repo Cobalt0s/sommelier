@@ -3,7 +3,7 @@ from sommelier.logging import Judge
 
 from sommelier.utils.string_manipulations import StringUtils
 
-from sommelier.steps import apiMockManager
+from features import apiMockManager
 
 
 @given('Associate svc {services} with ports {ports}')
@@ -36,27 +36,27 @@ def refer_to_mock(context, alias):
     apiMockManager.set_current(alias)
 
 
-@given('... mock with request')
+@given('mock with request')
 def mock_with_request(context):
     apiMockManager.add_request_to_current_mock()
 
 
-@given('... mock with response')
+@given('mock with response')
 def mock_with_response(context):
     apiMockManager.add_response_to_current_mock()
 
 
-@given('... mock with response status {status}')
+@given('mock with response status {status}')
 def mock_with_response_status(context, status):
     apiMockManager.add_response_status_to_current_mock(status)
 
 
-@given('... mock must be called {amount} times')
+@given('mock must be called {amount} times')
 def mock_with_expected_calls(context, amount):
     apiMockManager.add_num_expected_calls_to_current_mock(amount)
 
 
-@given('... end of mock definition')
+@given('end of mock definition')
 def mock_end(context):
     apiMockManager.end_mock_definition()
 

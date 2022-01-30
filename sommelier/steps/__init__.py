@@ -7,4 +7,3 @@ identifier_registry = IdentifierRegistry()
 response_validator = ResponseValidator(identifier_registry)
 
 pagination_navigator = PaginationNavigator()
-apiMockManager = APIMockManager()
