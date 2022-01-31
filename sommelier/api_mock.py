@@ -57,28 +57,28 @@ class APIMockManager(object):
     def add_request_to_current_mock(self):
         self._has_current_mock()
         current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
+        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
             'request': table_as_dict(self.context)
         })
 
     def add_response_to_current_mock(self):
         self._has_current_mock()
         current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
+        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
             'response': table_as_dict(self.context)
         })
 
     def add_response_status_to_current_mock(self, status):
         self._has_current_mock()
         current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
+        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
             'statusCode': status
         })
 
     def add_num_expected_calls_to_current_mock(self, amount):
         self._has_current_mock()
         current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
+        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
             'expectedNumCalls': amount
         })
 
@@ -99,7 +99,7 @@ class APIMockManager(object):
     def remove_mock(self, alias):
         self._has_mock_definition(alias)
         mock = self.context.rest_mock['definitions'][alias]
-        self.client.delete(f'/mocks/services/{mock.svc}/endpoints/{mock.id}')
+        self.client.delete(f'/mocks/services/{mock["svc"]}/endpoints/{mock["id"]}')
 
     def _has_current_mock(self):
         Judge(self.context).assumption(
