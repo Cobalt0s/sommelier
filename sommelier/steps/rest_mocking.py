@@ -36,6 +36,11 @@ def refer_to_mock(context, alias):
     apiMockManager.set_current(alias)
 
 
+@given('mock with headers')
+def mock_with_headers(context):
+    apiMockManager.add_headers_to_current_mock()
+
+
 @given('mock with request')
 def mock_with_request(context):
     apiMockManager.add_request_to_current_mock()

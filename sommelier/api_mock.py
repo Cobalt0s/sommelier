@@ -54,33 +54,27 @@ class APIMockManager(object):
         mock = self.context.rest_mock['definitions'][alias]
         self._set_current_mock(alias, mock.id, mock.svc, mock.operation, mock.url)
 
-    def add_request_to_current_mock(self):
+    def _update_current_mock(self, key, value):
         self._has_current_mock()
         current = self.context.rest_mock['current']
         self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
-            'request': table_as_dict(self.context)
+            key: value
         })
+
+    def add_headers_to_current_mock(self):
+        self._update_current_mock('headers', table_as_dict(self.context))
+
+    def add_request_to_current_mock(self):
+        self._update_current_mock('request', table_as_dict(self.context))
 
     def add_response_to_current_mock(self):
-        self._has_current_mock()
-        current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
-            'response': table_as_dict(self.context)
-        })
+        self._update_current_mock('response', table_as_dict(self.context))
 
     def add_response_status_to_current_mock(self, status):
-        self._has_current_mock()
-        current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
-            'statusCode': status
-        })
+        self._update_current_mock('statusCode', status)
 
     def add_num_expected_calls_to_current_mock(self, amount):
-        self._has_current_mock()
-        current = self.context.rest_mock['current']
-        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
-            'expectedNumCalls': amount
-        })
+        self._update_current_mock('expectedNumCalls', amount)
 
     def end_mock_definition(self):
         self.context.rest_mock['current'] = {}
