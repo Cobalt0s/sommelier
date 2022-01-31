@@ -89,18 +89,23 @@ class SimpleApiClient:
         self.context = context
 
     def perform_request(self, request_method, url, body, headers):
+        self.context.url = url
         if body is None:
             return request_method(self.host_url + url, headers=headers)
         return request_method(self.host_url + url, json=body, headers=headers)
 
     def get(self, url, json=None, headers=None):
+        self.context.requests_verb = "GET"
         self.context.result = self.perform_request(requests.get, url, json, headers)
 
     def post(self, url, json=None, headers=None):
+        self.context.requests_verb = "POST"
         self.context.result = self.perform_request(requests.post, url, json, headers)
 
     def put(self, url, json=None, headers=None):
+        self.context.requests_verb = "PUT"
         self.context.result = self.perform_request(requests.put, url, json, headers)
 
     def delete(self, url, json=None, headers=None):
+        self.context.requests_verb = "DELETE"
         self.context.result = self.perform_request(requests.delete, url, json, headers)
