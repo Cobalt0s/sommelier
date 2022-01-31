@@ -29,7 +29,7 @@ class APIMockManager(object):
                 'id': svc,
                 'port': port
             })
-            self.context.rest_mock.services[svc] = port
+            self.context.rest_mock['services'][svc] = port
 
     def create_mock(self, alias, svc, operation, url, status):
         self.client.post(f'/mocks/services/{svc}/endpoints/form', {
@@ -42,7 +42,7 @@ class APIMockManager(object):
 
         self._set_current_mock(alias, identifier, svc, operation, url)
         if alias is not None:
-            self.context.rest_mock.definitions[alias] = {
+            self.context.rest_mock['definitions'][alias] = {
                 'id': identifier,
                 'svc': svc,
                 'operation': operation,
@@ -51,39 +51,39 @@ class APIMockManager(object):
 
     def set_current(self, alias):
         self._has_mock_definition(alias)
-        mock = self.context.rest_mock.definitions[alias]
+        mock = self.context.rest_mock['definitions'][alias]
         self._set_current_mock(alias, mock.id, mock.svc, mock.operation, mock.url)
 
     def add_request_to_current_mock(self):
         self._has_current_mock()
-        current = self.context.rest_mock.current
+        current = self.context.rest_mock['current']
         self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
             'request': table_as_dict(self.context)
         })
 
     def add_response_to_current_mock(self):
         self._has_current_mock()
-        current = self.context.rest_mock.current
+        current = self.context.rest_mock['current']
         self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
             'response': table_as_dict(self.context)
         })
 
     def add_response_status_to_current_mock(self, status):
         self._has_current_mock()
-        current = self.context.rest_mock.current
+        current = self.context.rest_mock['current']
         self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
             'statusCode': status
         })
 
     def add_num_expected_calls_to_current_mock(self, amount):
         self._has_current_mock()
-        current = self.context.rest_mock.current
+        current = self.context.rest_mock['current']
         self.client.put(f'/mocks/services/{current.svc}/endpoints/{current.id}', json={
             'expectedNumCalls': amount
         })
 
     def end_mock_definition(self):
-        self.context.rest_mock.current = {}
+        self.context.rest_mock['current'] = {}
 
     def is_satisfied(self):
         self.client.get('/mocks/services/unsatisfied')
@@ -92,27 +92,27 @@ class APIMockManager(object):
 
     def remove_svc(self, svc):
         Judge(self.context).expectation(
-            svc in self.context.rest_mock.services, f"cannot remove mocks from unknown service '{svc}'"
+            svc in self.context.rest_mock['services'], f"cannot remove mocks from unknown service '{svc}'"
         )
         self.client.delete(f'/mocks/services/{svc}')
 
     def remove_mock(self, alias):
         self._has_mock_definition(alias)
-        mock = self.context.rest_mock.definitions[alias]
+        mock = self.context.rest_mock['definitions'][alias]
         self.client.delete(f'/mocks/services/{mock.svc}/endpoints/{mock.id}')
 
     def _has_current_mock(self):
         Judge(self.context).assumption(
-            'svc' in self.context.rest_mock.current, "no current mock definition exists"
+            'svc' in self.context.rest_mock['current'], "no current mock definition exists"
         )
 
     def _has_mock_definition(self, alias):
         Judge(self.context).expectation(
-            alias in self.context.rest_mock.definitions, f"mock with name '{alias}' is not defined"
+            alias in self.context.rest_mock['definitions'], f"mock with name '{alias}' is not defined"
         )
 
     def _set_current_mock(self, alias, identifier, svc, operation, url):
-        self.context.rest_mock.current = {
+        self.context.rest_mock['current'] = {
             'id': identifier,
             "alias": alias,
             "svc": svc,
