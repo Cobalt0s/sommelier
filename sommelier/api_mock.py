@@ -88,7 +88,7 @@ class APIMockManager(object):
     def is_satisfied(self):
         self.client.get('/mocks/services/unsatisfied')
         data = get_json(self.context).get("data")
-        Judge(self.context).assumption(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
+        Judge(self.context).expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
 
     def remove_svc(self, svc):
         Judge(self.context).expectation(
