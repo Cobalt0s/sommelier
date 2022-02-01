@@ -71,9 +71,11 @@ def check_all_mocks(context):
     apiMockManager.is_satisfied()
 
 
-@given('Mocks on {svc} are removed')
-def mock_svc_remove(context, svc):
-    apiMockManager.remove_svc(svc)
+@given('Mocks on {svcs} are removed')
+def mock_svc_remove(context, svcs):
+    services = StringUtils.comma_separated_to_list(svcs)
+    for svc in services:
+        apiMockManager.remove_svc(svc)
 
 
 @given('Mock named {alias} is removed')
