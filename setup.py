@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='sommelier',
-    version='1.1.8',
+    version='1.1.9',
     packages=find_packages(),
     license='MIT',
     description='Testing wrapper of Behave library',
