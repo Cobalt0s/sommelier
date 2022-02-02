@@ -78,6 +78,11 @@ def mock_svc_remove(context, svcs):
         apiMockManager.remove_svc(svc)
 
 
+@given('All mocks are cleared')
+def mock_clear_all(context):
+    apiMockManager.clear_mocks()
+
+
 @given('Mock named {alias} is removed')
 def mock_name_remove(context, alias):
     apiMockManager.remove_mock(alias)

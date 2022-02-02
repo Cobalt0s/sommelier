@@ -90,6 +90,9 @@ class APIMockManager(object):
         )
         self.client.delete(f'/mocks/services/{svc}')
 
+    def clear_mocks(self):
+        self.client.delete(f'/mocks/services/endpoints')
+
     def remove_mock(self, alias):
         self._has_mock_definition(alias)
         mock = self.context.rest_mock['definitions'][alias]
