@@ -10,6 +10,11 @@ def event_production_is_expected(context, topic_name):
     event_manager.save_expected_event(topic_name, is_expected=True)
 
 
+@then('Event on topic {topic_name} is expected to be emitted, alias as {alias_name}')
+def event_production_is_expected_with_alias(context, topic_name, alias_name):
+    event_manager.save_expected_event(topic_name, is_expected=True, name=alias_name)
+
+
 @then('Event {topic_type} on topic {topic_name} is expected to be emitted for author {author_id}')
 def event_production_is_expected_with_payload(context, topic_type, topic_name, author_id):
     event_manager.save_expected_event_with_payload(topic_name, topic_type, author_id, is_expected=True)

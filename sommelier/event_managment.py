@@ -40,6 +40,7 @@ def validate_events_for_topic(context, event_registry, expected_events, topic, i
             if events_equal(context, expected_event['payload'], given_event, ignored_keys):
                 match = True
                 index_to_remove = i
+                save_event_attaching_test_name(context, expected_event)
                 break
 
         if index_to_remove is not None:
@@ -56,6 +57,12 @@ def validate_events_for_topic(context, event_registry, expected_events, topic, i
         )
 
 
+def save_event_attaching_test_name(context, expected_event):
+    event_alias_name = expected_event['name']
+    if event_alias_name is not None:
+        context.named_events[event_alias_name] = expected_event['payload']
+
+
 class EventManager:
 
     def __init__(self, host, wait_timeout):
@@ -69,9 +76,10 @@ class EventManager:
 
     def reset(self):
         self.context.events = {}
+        self.context.named_events = {}
         self.context.topics = {}
 
-    def _save_expected_event(self, topic_name, is_expected, payload):
+    def _save_expected_event(self, topic_name, is_expected, payload, name=None):
         arr = []
         if topic_name in self.context.events:
             arr = self.context.events[topic_name]
@@ -80,6 +88,7 @@ class EventManager:
         arr.append({
             'is_expected': is_expected,
             'payload': payload,
+            'name': name,
         })
         if topic_name in self.context.topics:
             self.context.topics[topic_name] += 1
@@ -93,8 +102,8 @@ class EventManager:
             'payload': table_as_dict(self.context),
         })
 
-    def save_expected_event(self, topic_name, is_expected):
-        self._save_expected_event(topic_name, is_expected, table_as_dict(self.context))
+    def save_expected_event(self, topic_name, is_expected, name=None):
+        self._save_expected_event(topic_name, is_expected, table_as_dict(self.context), name)
 
     def _collect_events(self, drain_timeout=None):
         event_registry = {}
@@ -104,7 +113,7 @@ class EventManager:
 
     def validate_expected_events(self, drain_timeout=None, ignored_keys=None):
         event_registry = self._collect_events(drain_timeout)
-        
+
         for topic, expected_events in self.context.events.items():
             validate_events_for_topic(self.context, event_registry, expected_events, topic, ignored_keys)
         self.context.events = {}
@@ -131,4 +140,3 @@ class EventManager:
             f"Expected to skip {num_messages} while got {received_num_messages} events '{pretty(self.context, events)}'",
             api_enhancements=False
         )
-
