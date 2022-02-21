@@ -40,7 +40,7 @@ def validate_events_for_topic(context, event_registry, expected_events, topic, i
             if events_equal(context, expected_event['payload'], given_event, ignored_keys):
                 match = True
                 index_to_remove = i
-                save_event_attaching_test_name(context, expected_event)
+                save_event_attaching_test_name(context, given_event)
                 break
 
         if index_to_remove is not None:
