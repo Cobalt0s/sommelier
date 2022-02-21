@@ -40,7 +40,7 @@ def validate_events_for_topic(context, event_registry, expected_events, topic, i
             if events_equal(context, expected_event['payload'], given_event, ignored_keys):
                 match = True
                 index_to_remove = i
-                save_event_attaching_test_name(context, given_event)
+                save_event_attaching_test_name(context, expected_event['name'], given_event)
                 break
 
         if index_to_remove is not None:
@@ -57,10 +57,9 @@ def validate_events_for_topic(context, event_registry, expected_events, topic, i
         )
 
 
-def save_event_attaching_test_name(context, expected_event):
-    event_alias_name = expected_event['name']
+def save_event_attaching_test_name(context, event_alias_name, event):
     if event_alias_name is not None:
-        context.named_events[event_alias_name] = expected_event['payload']
+        context.named_events[event_alias_name] = event
 
 
 class EventManager:
