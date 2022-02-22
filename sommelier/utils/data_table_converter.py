@@ -1,4 +1,3 @@
-from sommelier.utils.dict_helpers import DictUtils
 from sommelier.utils.identifier_resolver import resolve_id_or_tautology
 from sommelier.utils.string_manipulations import StringUtils
 
@@ -43,6 +42,8 @@ def parse_json_value(context, value):
         return False
     if value == "None" or value.lower() == "null":
         return None
+    if value == "{}":
+        return {}
     return resolve_id_or_tautology(context, value)
 
 
@@ -60,7 +61,6 @@ def get_table(context):
     return context.table
 
 
-# THIS IS DEPRECATED from the direct use
 class CustomTable:
 
     def __init__(self, rows):
