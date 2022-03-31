@@ -1,3 +1,5 @@
+import json
+
 from sommelier.utils.identifier_resolver import resolve_id_or_tautology
 from sommelier.utils.string_manipulations import StringUtils
 
@@ -7,9 +9,8 @@ def column_list(context):
 
 
 def table_as_dict(context):
-    json = dict(table_as_2d_list(context))
-    _expand_nested_keys(json)
-    return json
+    payload = dict(table_as_2d_list(context))
+    return _expand_nested_keys(payload)
 
 
 def table_as_2d_list(context, position_of_value=1):
@@ -79,7 +80,7 @@ def _table_to_2d_list(table):
     return result
 
 
-def _expand_nested_keys(json):
+def _expand_nested_keys(payload):
     # To represent json in flattened form use `.` for specifying nested fields
     # * Given json:
     #
@@ -92,13 +93,13 @@ def _expand_nested_keys(json):
     # eduction.grade: good
 
     nested_keys = []
-    for k in json:
+    for k in payload:
         if '.' in k:
             nested_keys.append(k)
 
     for k in nested_keys:
-        value = json[k]
-        current_obj = json
+        value = payload[k]
+        current_obj = payload
         # Zoom into the key which will create new objects or reuse existing
         key_list = k.split('.')
         for i in range(len(key_list)):
@@ -116,4 +117,87 @@ def _expand_nested_keys(json):
                 current_obj = current_obj[subkey]
 
         # nobody needs fully qualified key at the end of this procedure
-        del json[k]
+        del payload[k]
+
+    return _convert_indexed_obj_to_arr(payload)
+
+
+def _convert_indexed_obj_to_arr(payload):
+    arr = []
+    arr_key = None
+    for k in payload:
+        if StringUtils.is_array(k):
+            arr_key = k
+            arr.append(payload[k])
+        else:
+            payload[k] = _convert_indexed_obj_to_arr(payload[k])
+
+    if arr_key is not None:
+        return arr
+    else:
+        return payload
+
+
+def display(data):
+    print(json.dumps(data, ensure_ascii=False, sort_keys=True, indent=4))
+
+
+def perform_check(given, expected):
+    result = _expand_nested_keys(given)
+    ok = (expected == result)
+    if not ok:
+        display(expected)
+        display(result)
+    else:
+        print("Successful")
+
+
+if __name__ == '__main__':
+    test_cases = [
+        {
+            "given": {
+                "data.[0].user": {
+                    "name": "John"
+                },
+                "data.[1].user": {
+                    "name": "Bob"
+                }
+            },
+            "expected": {
+                "data": [
+                    {"user": {"name": "John"}},
+                    {"user": {"name": "Bob"}}
+                ]
+            }
+        },
+        {
+            "given": {
+                "[0]": 1,
+                "[1]": 2,
+            },
+            "expected": [1, 2]
+        },
+        {
+            "given": {
+                "data.first.[0]": "apple",
+                "data.first.[1]": "banana",
+                "data.second.[0]": "kiwi",
+                "data.second.[1].box": "carrots",
+            },
+            "expected": {
+                "data": {
+                    "first": [
+                        "apple",
+                        "banana",
+                    ],
+                    "second": [
+                        "kiwi",
+                        {"box": "carrots"},
+                    ]
+                }
+            }
+        }
+    ]
+
+    for v in test_cases:
+        perform_check(v["given"], v["expected"])
