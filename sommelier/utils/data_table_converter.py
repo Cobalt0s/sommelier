@@ -123,6 +123,8 @@ def _expand_nested_keys(payload):
 
 
 def _convert_indexed_obj_to_arr(payload):
+    if not isinstance(payload, dict):
+        return payload
     arr = []
     arr_key = None
     for k in payload:
