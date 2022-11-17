@@ -1,12 +1,11 @@
-from sommelier.logging import log_error, log_fatal, Judge
 from sommelier.utils.string_manipulations import StringUtils
 
 
 class JsonRetriever:
 
-    def __init__(self, context, data, path=''):
+    def __init__(self, context_manager, data, path=''):
         # TODO what if self.data is NONE, how every method behaves
-        self.context = context
+        self.context_manager = context_manager
         self.data = data
         # superficial path that records relative location to data
         self.path = path
@@ -24,12 +23,12 @@ class JsonRetriever:
 
         if self.data is not None:
             if is_obj and key in self.data:
-                return self.create_from_retriever(self.context, self.data[key], path)
+                return self.create_from_retriever(self.context_manager, self.data[key], path)
             if is_arr and array_index <= len(self.data) - 1:
-                return self.create_from_retriever(self.context, self.data[array_index], path)
+                return self.create_from_retriever(self.context_manager, self.data[array_index], path)
 
         if strict:
-            log_error(self.context, f'{path} key is missing in json response', self.root.data)
+            self.context_manager.log_error(f'{path} key is missing in json response', self.root.data)
         else:
             return None
 
@@ -38,11 +37,11 @@ class JsonRetriever:
             try:
                 return int(StringUtils.extract_array(key))
             except Exception:
-                log_fatal(self.context, f'invalid array key {key}')
+                self.context_manager.log_fatal(f'invalid array key {key}')
         return None
 
-    def create_from_retriever(self, context, data, path):
-        copy = JsonRetriever(context, data, path)
+    def create_from_retriever(self, context_manager, data, path):
+        copy = JsonRetriever(context_manager, data, path)
         copy.root = self.root
         return copy
 
@@ -73,12 +72,12 @@ class JsonRetriever:
                     del self.data[target]
                 else:
                     if strict:
-                        log_error(self.context, f'{zoom} key is neither dict nor array', self.root.data)
+                        self.context_manager.log_error(f'{zoom} key is neither dict nor array', self.root.data)
                     else:
                         pass
             else:
                 if strict:
-                    log_error(self.context, f'{zoom} key is neither dict nor array', self.root.data)
+                    self.context_manager.log_error(f'{zoom} key is neither dict nor array', self.root.data)
             return
 
         remove_path = ".".join(keys[:-1])
@@ -93,7 +92,7 @@ class JsonRetriever:
             return None
         if self.is_array():
             return self.data
-        Judge(self.context).expectation(
+        self.context_manager.judge().expectation(
             False,
             f'value of {self.path} in json response is not an array'
         )
@@ -105,7 +104,7 @@ class JsonRetriever:
                 or isinstance(self.data, int) \
                 or isinstance(self.data, bool):
             return str(self.data)
-        Judge(self.context).expectation(
+        self.context_manager.judge().expectation(
             False,
             f'value of {self.path} in json response is not string'
         )
@@ -114,7 +113,7 @@ class JsonRetriever:
         result = []
         arr = self.raw_array()
         for i in range(len(arr)):
-            result.append(self.create_from_retriever(self.context, arr[i], self.__create_path(f'[{i}]')))
+            result.append(self.create_from_retriever(self.context_manager, arr[i], self.__create_path(f'[{i}]')))
         return result
 
     def has(self, key):
@@ -133,16 +132,16 @@ class JsonRetriever:
         return isinstance(self.data, dict)
 
 
-def get_json(context):
+def get_json(context_manager):
     try:
-        data = context.result.json()
+        data = context_manager.response_result().json()
         if data is None:
             raise KeyError
         if isinstance(data, dict):
-            return JsonRetriever(context, data)
-        log_error(context, f'json is not an object, got: {data}')
+            return JsonRetriever(context_manager, data)
+        context_manager.log_error(f'json is not an object, got: {data}')
     except Exception:
-        log_error(context, f'json is missing in response with status {context.result.status_code}')
+        context_manager.log_error(f'json is missing in response with status {context_manager.status_code()}')
 
 
 def sort_dict(obj):

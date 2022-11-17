@@ -4,17 +4,8 @@ from sommelier.utils.identifier_resolver import resolve_id_or_tautology
 from sommelier.utils.string_manipulations import StringUtils
 
 
-def column_list(context):
-    return table_as_2d_list(context, 0)
-
-
-def table_as_dict(context):
-    payload = dict(table_as_2d_list(context))
-    return _expand_nested_keys(payload)
-
-
-def table_as_2d_list(context, position_of_value=1):
-    list_2d = _table_to_2d_list(get_table(context))
+def table_as_2d_list(context_manager, position_of_value=1):
+    list_2d = _table_to_2d_list(get_table(context_manager))
 
     result = []
     for item in list_2d:
@@ -24,9 +15,9 @@ def table_as_2d_list(context, position_of_value=1):
             arr = StringUtils.extract_array(value)
             for x in StringUtils.comma_separated_to_list(arr):
                 if x:
-                    value_result.append(parse_json_value(context, x))
+                    value_result.append(parse_json_value(context_manager, x))
         else:
-            value_result = parse_json_value(context, value)
+            value_result = parse_json_value(context_manager, value)
 
         key = item[0]
         if position_of_value == 1:
@@ -36,7 +27,7 @@ def table_as_2d_list(context, position_of_value=1):
     return result
 
 
-def parse_json_value(context, value):
+def parse_json_value(context_manager, value):
     if value == "True" or value == "true":
         return True
     if value == "False" or value == "false":
@@ -45,21 +36,22 @@ def parse_json_value(context, value):
         return None
     if value == "{}":
         return {}
-    return resolve_id_or_tautology(context, value)
+    return resolve_id_or_tautology(context_manager, value)
 
 
-def get_table(context):
-    if "payload" in context and context.payload is not None:
+def get_table(context_manager):
+    payload = context_manager.get('payload')
+    if payload is not None:
         table = []
-        for k in context.payload:
-            v = context.payload[k]
+        for k in payload:
+            v = payload[k]
             if isinstance(v, dict):
                 raise Exception("nested dictionaries for context.payload is not supported")
             table.append([k, v])
         # Clear the payload variable as it is temporary passed for side effects
-        context.payload = None
+        context_manager.set('payload', None)
         return CustomTable(table)
-    return context.table
+    return context_manager.table()
 
 
 class CustomTable:
@@ -80,7 +72,7 @@ def _table_to_2d_list(table):
     return result
 
 
-def _expand_nested_keys(payload):
+def expand_nested_keys(payload):
     # To represent json in flattened form use `.` for specifying nested fields
     # * Given json:
     #
@@ -145,7 +137,7 @@ def display(data):
 
 
 def perform_check(given, expected):
-    result = _expand_nested_keys(given)
+    result = expand_nested_keys(given)
     ok = (expected == result)
     if not ok:
         display(expected)

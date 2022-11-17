@@ -1,15 +1,8 @@
-from sommelier.utils import (
-    get_json,
-    table_as_dict
-)
 from sommelier.utils.assertions import (
     assert_json_properties_in_object,
     assert_json_properties_in_list,
     assert_json_properties_not_in_list,
 )
-from sommelier.utils.data_table_converter import column_list
-from sommelier.utils.list_lookup import context_contains, context_missing
-from sommelier.logging import Judge
 
 STATUS_CODES = {
     'OK': 200,
@@ -27,16 +20,16 @@ STATUS_CODES = {
 
 class ResponseListChecker(object):
 
-    def __init__(self, context, identifier_registry, nested_key):
-        self.context = context
+    def __init__(self, context_manager, identifier_registry, nested_key):
+        self.context_manager = context_manager
         self.identifier_registry = identifier_registry
         self.nested_key = nested_key
 
     def contains(self, k, v):
-        context_contains(self.context, self.nested_key, k, v)
+        self.context_manager.context_contains(self.nested_key, k, v)
 
     def missing(self, k, v):
-        context_missing(self.context, self.nested_key, k, v)
+        self.context_manager.context_missing(self.nested_key, k, v)
 
     def contains_id(self, identifier):
         self.contains('id', self.identifier_registry.resolve_alias(identifier))
@@ -52,7 +45,7 @@ class ResponseValidator(object):
     NOT_IN_LIST = 3
 
     def __init__(self, identifier_registry):
-        self.context = None
+        self.context_manager = None
         self.identifier_registry = identifier_registry
         self.assertion_methods = {
             self.IN_OBJECT: assert_json_properties_in_object,
@@ -60,54 +53,54 @@ class ResponseValidator(object):
             self.NOT_IN_LIST: assert_json_properties_not_in_list,
         }
 
-    def set_context(self, context):
-        self.context = context
+    def set_ctx_manager(self, context_manager):
+        self.context_manager = context_manager
 
     def get_list(self, key):
-        return ResponseListChecker(self.context, self.identifier_registry, key)
+        return ResponseListChecker(self.context_manager, self.identifier_registry, key)
 
     def assert_status(self, status):
-        Judge(self.context).assumption(status.upper() in STATUS_CODES, f'status code {status.upper()} is not supported')
+        self.context_manager.judge().assumption(status.upper() in STATUS_CODES, f'status code {status.upper()} is not supported')
         status_code = STATUS_CODES[status.upper()]
-        Judge(self.context).expectation(
-            status_code == self.context.result.status_code,
-            f"Expected {status_code} given {self.context.result.status_code}"
+        self.context_manager.judge().expectation(
+            status_code == self.context_manager.status_code(),
+            f"Expected {status_code} given {self.context_manager.status_code()}"
         )
 
     def check_failure(self, code, details=None):
-        json = get_json(self.context)
+        json = self.context_manager.get_json()
         failure_code = json.get('error.code').raw_str()
         failure_details = json.get('error.details')
         if details is None:
             # We have a dictionary of values to see in details
             assert code == failure_code, f"Expected error of failure '{code}' actual '{failure_code}'"
-            expected_details = table_as_dict(self.context)
+            expected_details = self.context_manager.get_table_dict()
             for key in expected_details:
                 x = expected_details[key]
                 y = failure_details.get(key)
-                Judge(self.context).expectation(
+                self.context_manager.judge().expectation(
                     x == y.data,  ### TODO do not use .data, use getter
                     f"Expected `{x}` actual `{y}` for error.details.{key}"
                 )
         else:
             # We have a single value in detail
-            Judge(self.context).expectation(
+            self.context_manager.judge().expectation(
                 code == failure_code,
                 f"Expected error code '{code}' actual '{failure_code}'",
             )
-            Judge(self.context).expectation(
+            self.context_manager.judge().expectation(
                 details == failure_details,
                 f"Expected `{details}` actual `{failure_details}` for error.details"
             )
 
     def missing_keys(self):
-        json = get_json(self.context)
+        json = self.context_manager.get_json()
         failure_code = json.get('error.code').raw_str()
         failure_details = json.get('error.details').raw_array()
 
         code = 'missing-required-values'
         assert code == failure_code, f"Expected error of failure {code} actual '{failure_code}'"
-        missing_values = column_list(self.context)
+        missing_values = self.context_manager.column_list()
 
         failure_details.sort()
         missing_values.sort()
@@ -116,8 +109,7 @@ class ResponseValidator(object):
 
     def contains_data(self, item_key=None, assertion_type=None):
         if item_key is None:
-            json = get_json(self.context)
-            assert_json_properties_in_object(self.context, json)
+            self.context_manager.assert_json_properties_in_object()
         else:
             if assertion_type is None:
                 raise Exception(f'Specify an assertion method for {item_key}, ex: list/object')
@@ -131,13 +123,15 @@ class ResponseValidator(object):
             you can apply assertion on list or object via assertion_func
             located under item_key which is x or y in our case
         """
-        assertion_func(self.context, get_json(self.context).get(item_key))
+        assertion_func(self.context_manager, self.context_manager.get_json().get(item_key))
 
     def count_data(self, zoom, amount):
         amount = int(amount)
-        elements = get_json(self.context).get(zoom).raw_array()
+
+        json = self.context_manager.get_json()
+        elements = json.get(zoom).raw_array()
         size = len(elements)
-        Judge(self.context).expectation(
+        self.context_manager.judge().expectation(
             amount == size,
             f"Expected {amount} elements on page, given {size}"
         )

@@ -92,6 +92,6 @@ def wait_ms(context, duration):
 
 @when('Selecting one of the objects and saving as {item_id}')
 def select_object_and_save(context, item_id):
-    json = get_json(context)
+    json = context.ctx_manager.get_json()
     identifier = json.get('data.[0].id').raw_str()
     identifier_registry.create_alias(item_id, identifier)
