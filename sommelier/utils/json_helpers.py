@@ -117,7 +117,17 @@ class JsonRetriever:
         return result
 
     def has(self, key):
-        return key in self.data
+        zoom = StringUtils.dot_separated_to_list(key)
+        data = self.data
+        try:
+            for i in range(len(zoom)-1):
+                # zoom into data until last element
+                data = data[zoom[i]]
+            # last element should be inside json object
+            return zoom[-1] in data
+        except Exception:
+            # if during any zooming walk we abrupt then key is way off not in json
+            return False
 
     def raw(self):
         return self.data

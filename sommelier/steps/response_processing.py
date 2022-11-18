@@ -4,7 +4,6 @@ from uuid import uuid4
 from behave import given, then, when
 
 from sommelier import response_validator, pagination_navigator, identifier_registry
-from sommelier.utils import get_json
 from sommelier.utils.string_manipulations import StringUtils
 
 
@@ -26,6 +25,11 @@ def check_response_failure_code_and_details(context, code, details):
 @then('Contains properties in response body')
 def contains_properties(context):
     response_validator.contains_data()
+
+
+@then('Contains keys in response body')
+def contains_keys(context):
+    response_validator.contains_keys()
 
 
 @then('Contains properties inside object named {item_key}')

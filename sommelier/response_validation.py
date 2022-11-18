@@ -115,6 +115,18 @@ class ResponseValidator(object):
                 raise Exception(f'Specify an assertion method for {item_key}, ex: list/object')
             self._apply_assert(item_key, self.assertion_methods[assertion_type])
 
+    def contains_keys(self):
+        expected_keys = self.context_manager.column_list()
+        j = self.context_manager.get_json()
+        missing_keys = []
+        for k in expected_keys:
+            if not j.has(k):
+                missing_keys.append(k)
+        self.context_manager.judge().assumption(
+            len(missing_keys) == 0,
+            f"Response doesn't include keys: {missing_keys}"
+        )
+
     def _apply_assert(self, item_key, assertion_func):
         """
         Apply assert function on the nested object located under the key.

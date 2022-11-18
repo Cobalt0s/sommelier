@@ -98,11 +98,11 @@ class EventManager:
         self._save_expected_event(topic_name, is_expected, {
             'authorId': author_id,
             'type': topic_type,
-            'payload': self.context_manager.table_as_dict(),
+            'payload': self.context_manager.get_table_dict(),
         })
 
     def save_expected_event(self, topic_name, is_expected, name=None):
-        self._save_expected_event(topic_name, is_expected, self.context_manager.table_as_dict(), name)
+        self._save_expected_event(topic_name, is_expected, self.context_manager.get_table_dict(), name)
 
     def _collect_events(self, drain_timeout=None):
         event_registry = {}
@@ -118,7 +118,7 @@ class EventManager:
         self.context_manager.set('events', {})
 
     def produce_event(self, topic):
-        message = self.context_manager.table_as_dict()
+        message = self.context_manager.get_table_dict()
         self.event_producer.send_message(topic, message)
 
     def drain_events(self, topic):
