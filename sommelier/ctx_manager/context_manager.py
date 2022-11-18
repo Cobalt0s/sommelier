@@ -59,8 +59,9 @@ class ContextManager(object):
         return hasattr(self.response_result(), 'json')
 
     def declare(self, key):
-        # TODO this must be called when context manager is injected
-        self.master[key] = {}
+        # if value already exists we do NOT touch it
+        if key not in self.master:
+            self.master[key] = {}
 
     def context_contains(self, first_key, second_key, value):
         context_contains(self.context, first_key, second_key, value)
