@@ -1,8 +1,11 @@
+import json
 import logging
-import ast
 import time
 
 from confluent_kafka import Consumer
+
+DRAIN_TIMEOUT = 5
+POLL_TIMEOUT = 10
 
 
 class EventConsumer:
@@ -18,7 +21,7 @@ class EventConsumer:
         handler.setFormatter(logging.Formatter('%(asctime)-15s %(levelname)-8s %(message)s'))
         self.logger.addHandler(handler)
 
-    def consume(self, topic, num_messages):
+    def consume(self, topic, num_messages, drain_timeout=None):
         # Create Consumer instance
         # Hint: try debug='fetch' to generate some log messages
         c = Consumer({
@@ -29,17 +32,18 @@ class EventConsumer:
 
         # Subscribe to topics
         c.subscribe([topic])
-        messages = drain_messages_from_kafka(c, num_messages, topic)
+        messages = drain_messages_from_kafka(c, num_messages, topic, drain_timeout)
         c.close()
 
         return messages
 
 
-def drain_messages_from_kafka(c, num_messages, topic):
+def drain_messages_from_kafka(c, num_messages, topic, drain_timeout=None):
     messages = {}
     i = 0
+    drain_timeout = DRAIN_TIMEOUT if drain_timeout is None else drain_timeout
     # Drain num_messages of messages from the topic
-    timeout = time.time() + 10
+    timeout = time.time() + drain_timeout
     while i != num_messages:
         message, rtype = get_message_from_kafka(c)
         if rtype == "message":
@@ -58,7 +62,7 @@ def drain_messages_from_kafka(c, num_messages, topic):
 
 
 def get_message_from_kafka(c):
-    msg = c.poll(10)
+    msg = c.poll(POLL_TIMEOUT)
     if msg is None:
         return None, "finished"
     else:
@@ -74,7 +78,6 @@ def get_message_from_kafka(c):
             decoded_value = msg.value().decode("utf-8")
             if msg.key() is None:
                 return None, "heartbeat"
-            # print(decoded_value)
-            value = ast.literal_eval(decoded_value)
-            # print(value)
+
+            value = json.loads(decoded_value)
             return value, "message"
