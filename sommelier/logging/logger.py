@@ -53,8 +53,11 @@ def log_fatal(context_manager, text):
 
 
 def pretty(context_manager, data):
-    if isinstance(data, dict):
-        __resolve_dict(context_manager, data)
+    wrapped = {
+        "_": data,
+    }
+    __resolve_dict(context_manager, data)
+    data = wrapped['_']
     return json.dumps(data, ensure_ascii=False, sort_keys=True, indent=4)
 
 
