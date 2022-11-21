@@ -1,6 +1,12 @@
 from sommelier.utils.string_manipulations import StringUtils
 
 
+def correct_key_type(key):
+    if StringUtils.is_array(key):
+        return int(StringUtils.extract_array(key))
+    return key
+
+
 class JsonRetriever:
 
     def __init__(self, context_manager, data, path=''):
@@ -58,6 +64,23 @@ class JsonRetriever:
             if given_value is None:
                 return None
         return given_value
+
+    def set(self, key, val):
+        zoom = StringUtils.dot_separated_to_list(key)
+        data = self.data
+        for i in range(len(zoom)-1):
+            z = zoom[i]
+            data = data[correct_key_type(z)]
+
+        last_key = correct_key_type(zoom[-1])
+        try:
+            data[last_key] = val
+        except IndexError:
+            # we are dealing with arrays, maybe wanted to add last element
+            if len(data) == last_key:
+                data.append(val)
+            else:
+                raise IndexError
 
     def delete(self, zoom, strict=False):
         keys = StringUtils.dot_separated_to_list(zoom)
@@ -184,6 +207,67 @@ if __name__ == '__main__':
     }
     jr = JsonRetriever(None, a)
     jr.delete('hello.a.[1].yo.[2]')
-
     print(jr.raw() == b)
 
+    c = {
+        "hello": {
+            "a": [10, {
+                "yo": [3, 4, 7777]
+            }, 30],
+            "b": 7
+        },
+        "trace": 5
+    }
+    jr.set('hello.a.[1].yo.[2]', 7777)
+    print(jr.raw() == c)
+
+    d = {
+        "hello": {
+            "a": [10, {
+                "yo": [3, 4, 7777]
+            }, 30],
+            "b": 7
+        },
+        "trace": {
+            "id": 55,
+            "source": "serviceName"
+        }
+    }
+    jr.set('trace', {
+        "id": 55,
+        "source": "serviceName"
+    })
+    print(jr.raw() == d)
+
+    d = {
+        "hello": {
+            "a": [10, 30],
+            "b": 7
+        },
+        "trace": {
+            "id": 55,
+            "source": "serviceName"
+        }
+    }
+    jr.delete('hello.a.[1]')
+    print(jr.raw() == d)
+
+    e = {
+        "hello": {
+            "a": [10, 30],
+            "b": 7
+        },
+        "trace": {
+            "id": 55,
+            "source": "serviceName"
+        },
+        "baggage": {
+            "src": "authentication",
+            "target": "client"
+        },
+    }
+    jr.set('baggage', {
+        "src": "authentication",
+        "target": "client"
+    })
+    print(jr.raw() == e)

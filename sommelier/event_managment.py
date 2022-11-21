@@ -52,8 +52,20 @@ def validate_events_for_topic(context_manager, event_registry, expected_events, 
         context_manager.judge().expectation(
             is_expected == match,
             f"{error_message} event '{pretty(context_manager, expected_event['payload'])}'",
-            given_events
+            cross_out_ignored_fields(context_manager, given_events, ignored_keys)
         )
+
+
+def cross_out_ignored_fields(context_manager, events, ignored_keys):
+    result = []
+    for e in events:
+        j = JsonRetriever(context_manager, copy.deepcopy(e))
+        for key in ignored_keys:
+            val = j.get(key)
+            j.delete(key)
+            j.set(f"__ignored__.{key}", val)
+        result.append(j.raw())
+    return result
 
 
 def save_event_attaching_test_name(context_manager, event_alias_name, event):
