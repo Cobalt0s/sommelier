@@ -58,7 +58,7 @@ def validate_events_for_topic(context_manager, event_registry, expected_events, 
 
 def cross_out_ignored_fields(context_manager, events, ignored_keys):
     result = []
-    for e in events:
+    for e in events.values():
         j = JsonRetriever(context_manager, copy.deepcopy(e))
         for key in ignored_keys:
             val = j.get(key)
