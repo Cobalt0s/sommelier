@@ -3,8 +3,14 @@ from sommelier.utils.string_manipulations import StringUtils
 
 def correct_key_type(key):
     if StringUtils.is_array(key):
-        return int(StringUtils.extract_array(key))
-    return key
+        return int(StringUtils.extract_array(key)), True  # is array
+    return key, False
+
+
+def initial_value(is_arr):
+    if is_arr:
+        return []
+    return {}
 
 
 class JsonRetriever:
@@ -67,20 +73,32 @@ class JsonRetriever:
 
     def set(self, key, val):
         zoom = StringUtils.dot_separated_to_list(key)
+        # copy recursively the references by unwrapping key/zoom
         data = self.data
-        for i in range(len(zoom)-1):
-            z = zoom[i]
-            data = data[correct_key_type(z)]
+        for i in range(len(zoom) - 1):
+            z, _ = correct_key_type(zoom[i])
+            try:
+                data = data[z]
+            except KeyError:
+                # lookup the next element to know which data type we have to declare
+                _, is_arr = correct_key_type(zoom[i + 1])
+                data[z] = initial_value(is_arr)
+                # now it is safe to retry unwrapping
+                data = data[z]
+            except IndexError as err:
+                if z == 0:
+                    _, is_arr = correct_key_type(zoom[i + 1])
+                    data.append(initial_value(is_arr))
+                    data = data[z]
+                else:
+                    raise err
 
-        last_key = correct_key_type(zoom[-1])
-        try:
+        # set the final last element
+        last_key, is_arr = correct_key_type(zoom[-1])
+        if is_arr and len(data) == last_key:
+            data.append(val)
+        else:
             data[last_key] = val
-        except IndexError:
-            # we are dealing with arrays, maybe wanted to add last element
-            if len(data) == last_key:
-                data.append(val)
-            else:
-                raise IndexError
 
     def delete(self, zoom, strict=False):
         keys = StringUtils.dot_separated_to_list(zoom)
@@ -143,7 +161,7 @@ class JsonRetriever:
         zoom = StringUtils.dot_separated_to_list(key)
         data = self.data
         try:
-            for i in range(len(zoom)-1):
+            for i in range(len(zoom) - 1):
                 # zoom into data until last element
                 data = data[zoom[i]]
             # last element should be inside json object
@@ -262,12 +280,10 @@ if __name__ == '__main__':
             "source": "serviceName"
         },
         "baggage": {
-            "src": "authentication",
-            "target": "client"
+            "target": [{
+                "name": "client",
+            }],
         },
     }
-    jr.set('baggage', {
-        "src": "authentication",
-        "target": "client"
-    })
+    jr.set('baggage.target.[0].name', 'client')
     print(jr.raw() == e)
