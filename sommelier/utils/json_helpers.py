@@ -72,6 +72,8 @@ class JsonRetriever:
         return given_value
 
     def set(self, key, val):
+        if isinstance(val, JsonRetriever):
+            val = val.raw()
         zoom = StringUtils.dot_separated_to_list(key)
         # copy recursively the references by unwrapping key/zoom
         data = self.data

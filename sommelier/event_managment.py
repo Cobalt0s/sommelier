@@ -7,16 +7,9 @@ from sommelier.logging import pretty
 from sommelier.events import EventConsumer, EventProducer
 
 
-def events_equal(context_manager, expected_event, given_event, ignored_keys=None):
+def events_equal(context_manager, expected_event, given_event, ignored_keys):
     a = JsonRetriever(context_manager, copy.deepcopy(expected_event))
     b = JsonRetriever(context_manager, copy.deepcopy(given_event))
-
-    if ignored_keys is None:
-        ignored_keys = []
-
-    # ignore tracing information that may come with event
-    # effectively we are making comparison of every other field
-    ignored_keys.append('trace')
 
     for i in range(len(ignored_keys)):
         key = ignored_keys[i]
@@ -30,9 +23,14 @@ def events_equal(context_manager, expected_event, given_event, ignored_keys=None
 
 
 def validate_events_for_topic(context_manager, event_registry, expected_events, topic, ignored_keys=None):
+    if ignored_keys is None:
+        ignored_keys = []
+    # ignore tracing information that may come with event
+    # effectively we are making comparison of every other field
+    ignored_keys.append('trace')
+
     given_events = event_registry[topic]
     for expected_event in expected_events:
-
         match = False
         index_to_remove = None
         for i, given_event in given_events.items():
