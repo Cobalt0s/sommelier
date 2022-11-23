@@ -1,8 +1,3 @@
-from sommelier.logging import Judge
-
-from sommelier.utils import get_json
-
-
 class PaginationNavigator:
 
     def __init__(self):

@@ -191,18 +191,6 @@ class JsonRetriever:
         return isinstance(self.data, dict)
 
 
-def get_json(context_manager):
-    try:
-        data = context_manager.response_result().json()
-        if data is None:
-            raise KeyError
-        if isinstance(data, dict):
-            return JsonRetriever(context_manager, data)
-        context_manager.log_error(f'json is not an object, got: {data}')
-    except Exception:
-        context_manager.log_error(f'json is missing in response with status {context_manager.status_code()}')
-
-
 if __name__ == '__main__':
     a = {
         "hello": {

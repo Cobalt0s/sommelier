@@ -1,9 +1,8 @@
-from sommelier.utils import get_json
-from sommelier.logging import Judge, find_alias
+from sommelier.logging import find_alias
 
 
 def context_contains(context_manager, first_key, second_key, value):
-    data = get_json(context_manager)
+    data = context_manager.get_json()
     if data.has(first_key):
         _list_search(context_manager, data.get(first_key).raw_array(), second_key, value, expected_to_find=True)
     else:
@@ -11,7 +10,7 @@ def context_contains(context_manager, first_key, second_key, value):
 
 
 def context_missing(context_manager, first_key, second_key, value):
-    data = get_json(context_manager)
+    data = context_manager.get_json()
     if data.has(first_key):
         _list_search(context_manager, data.get(first_key).raw_array(), second_key, value, expected_to_find=False)
     else:

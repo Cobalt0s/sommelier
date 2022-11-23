@@ -1,5 +1,5 @@
 from sommelier.logging import Judge, log_error, log_fatal
-from sommelier.utils import get_json
+from sommelier.utils import JsonRetriever
 from sommelier.utils.assertions import assert_json_properties_in_object
 from sommelier.utils.data_table_converter import table_as_2d_list, expand_nested_keys
 from sommelier.utils.list_lookup import context_contains, context_missing
@@ -44,7 +44,15 @@ class ContextManager(object):
         return expand_nested_keys(payload)
 
     def get_json(self):
-        return get_json(self)
+        try:
+            data = self.response_result().json()
+            if data is None:
+                raise KeyError
+            if isinstance(data, dict):
+                return JsonRetriever(self, data)
+            self.log_error(f'json is not an object, got: {data}')
+        except Exception:
+            self.log_error(f'json is missing in response with status {self.status_code()}')
 
     def column_list(self):
         return table_as_2d_list(self, 0)
