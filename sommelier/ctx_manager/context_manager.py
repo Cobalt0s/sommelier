@@ -2,7 +2,6 @@ from sommelier.logging import Judge, log_error, log_fatal
 from sommelier.utils import JsonRetriever, StringUtils
 from sommelier.utils.assertions import assert_json_properties_in_object
 from sommelier.utils.data_table_converter import table_as_2d_list, expand_nested_keys
-from sommelier.utils.list_lookup import context_contains, context_missing
 
 # TODO all managers should register, rely on the context wrapper
 # behave provides context variable which we operate on
@@ -72,12 +71,6 @@ class ContextManager(object):
         # if value already exists we do NOT touch it
         if key not in self.master:
             self.master[key] = {}
-
-    def context_contains(self, first_key, second_key, value):
-        context_contains(self.context, first_key, second_key, value)
-
-    def context_missing(self, first_key, second_key, value):
-        context_missing(self.context, first_key, second_key, value)
 
     def assert_json_properties_in_object(self):
         json = self.get_json()

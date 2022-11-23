@@ -1,41 +1,10 @@
+from sommelier.assertions import ResponseListChecker
+from sommelier.utils import HttpStatusCodeUtils
 from sommelier.utils.assertions import (
     assert_json_properties_in_object,
     assert_json_properties_in_list,
     assert_json_properties_not_in_list,
 )
-
-STATUS_CODES = {
-    'OK': 200,
-    'CREATED': 201,
-    'NO CONTENT': 204,
-    'BAD REQUEST': 400,
-    'UNAUTHORIZED': 401,
-    'FORBIDDEN': 403,
-    'NOT FOUND': 404,
-    'CONFLICT': 409,
-    'SERVER ERROR': 500,
-    'NOT IMPLEMENTED': 501,
-}
-
-
-class ResponseListChecker(object):
-
-    def __init__(self, context_manager, identifier_registry, nested_key):
-        self.context_manager = context_manager
-        self.identifier_registry = identifier_registry
-        self.nested_key = nested_key
-
-    def contains(self, k, v):
-        self.context_manager.context_contains(self.nested_key, k, v)
-
-    def missing(self, k, v):
-        self.context_manager.context_missing(self.nested_key, k, v)
-
-    def contains_id(self, identifier):
-        self.contains('id', self.identifier_registry.resolve_alias(identifier))
-
-    def missing_id(self, identifier):
-        self.missing('id', self.identifier_registry.resolve_alias(identifier))
 
 
 class ResponseValidator(object):
@@ -60,8 +29,8 @@ class ResponseValidator(object):
         return ResponseListChecker(self.context_manager, self.identifier_registry, key)
 
     def assert_status(self, status):
-        self.context_manager.judge().assumption(status.upper() in STATUS_CODES, f'status code {status.upper()} is not supported')
-        status_code = STATUS_CODES[status.upper()]
+        status_code = HttpStatusCodeUtils.name_to_code(status)
+        self.context_manager.judge().assumption(status_code is not None, f'status code {status.upper()} is not supported')
         self.context_manager.judge().expectation(
             status_code == self.context_manager.status_code(),
             f"Expected {status_code} given {self.context_manager.status_code()}"

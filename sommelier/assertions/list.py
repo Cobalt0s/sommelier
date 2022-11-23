@@ -32,6 +32,24 @@ def _list_search(context_manager, item_list, key, value, expected_to_find=True):
     context_manager.judge().expectation(
         found == expected_to_find,
         f"Entry ['{key}': '{find_alias(context_manager, value)}'] {found_text}",
-    )
+        )
 
 
+class ResponseListChecker(object):
+
+    def __init__(self, context_manager, identifier_registry, nested_key):
+        self.context_manager = context_manager
+        self.identifier_registry = identifier_registry
+        self.nested_key = nested_key
+
+    def contains(self, k, v):
+        context_contains(self.context_manager, self.nested_key, k, v)
+
+    def missing(self, k, v):
+        context_missing(self.context_manager, self.nested_key, k, v)
+
+    def contains_id(self, identifier):
+        self.contains('id', self.identifier_registry.resolve_alias(identifier))
+
+    def missing_id(self, identifier):
+        self.missing('id', self.identifier_registry.resolve_alias(identifier))
