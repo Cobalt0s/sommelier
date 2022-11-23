@@ -1,3 +1,4 @@
+from sommelier.behave_wrapper import LabelingMachine
 from sommelier.logging import find_alias
 
 
@@ -37,10 +38,10 @@ def _list_search(context_manager, item_list, key, value, expected_to_find=True):
 
 class ResponseListChecker(object):
 
-    def __init__(self, context_manager, identifier_registry, nested_key):
+    def __init__(self, context_manager, nested_key):
         self.context_manager = context_manager
-        self.identifier_registry = identifier_registry
         self.nested_key = nested_key
+        self.labeling_machine = self.context_manager.of(LabelingMachine)
 
     def contains(self, k, v):
         context_contains(self.context_manager, self.nested_key, k, v)
@@ -49,7 +50,7 @@ class ResponseListChecker(object):
         context_missing(self.context_manager, self.nested_key, k, v)
 
     def contains_id(self, identifier):
-        self.contains('id', self.identifier_registry.resolve_alias(identifier))
+        self.contains('id', self.labeling_machine.find(identifier))
 
     def missing_id(self, identifier):
-        self.missing('id', self.identifier_registry.resolve_alias(identifier))
+        self.missing('id', self.labeling_machine.find(identifier))

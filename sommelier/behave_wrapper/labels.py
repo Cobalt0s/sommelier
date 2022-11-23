@@ -13,12 +13,12 @@ class LabelingMachine(object):
     def create_alias(self, name, value):
         value = str(value)
         self.context_manager.set(f'aliases.{name}', value)
-        if self.is_permanent_mode():
+        if self.__is_permanent_mode():
             # This alias should be persisted for the whole test execution and should not be reset
             self.context_manager.set(f'aliases_permanent.{name}', value)
             self.context_manager.log_info(f"ID[{name}] with Value[{value}]")
 
-    def is_permanent_mode(self) -> bool:
+    def __is_permanent_mode(self) -> bool:
         return self.context_manager.get('mode_permanent_aliases')
 
     def toggle_permanent_mode(self, mode_status):
@@ -34,6 +34,12 @@ class LabelingMachine(object):
             f'Alias "{name}" is not found since no id is associated with it',
         )
 
+    def find_many(self, names: list) -> list:
+        result = []
+        for n in names:
+            result.append(self.find(n))
+        return result
+
     def alias_of(self, value):
         aliases = self.context_manager.get('aliases')
         for k, v in aliases.items():
@@ -41,14 +47,4 @@ class LabelingMachine(object):
                 return k
         # There is no alias with such value
         return None
-
-
-    def resolve_or_tautology(self, name):
-        if StringUtils.is_variable(name):
-            name = StringUtils.extract_variable(name)
-            if name == StringUtils.RANDOM_VAR:
-                return StringUtils.get_random_string(10)
-            return self.find(name)
-        return name
-
 

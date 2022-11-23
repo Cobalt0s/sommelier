@@ -6,6 +6,6 @@ from sommelier.response_validation import ResponseValidator
 from sommelier.web_socket import WsSocketManager
 
 identifier_registry = IdentifierRegistry()
-response_validator = ResponseValidator(identifier_registry)
+response_validator = ResponseValidator()
 
 pagination_navigator = PaginationNavigator()

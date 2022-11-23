@@ -7,9 +7,8 @@ from sommelier.utils import HttpStatusCodeUtils
 
 class ResponseValidator(object):
 
-    def __init__(self, identifier_registry):
+    def __init__(self):
         self.context_manager = None
-        self.identifier_registry = identifier_registry
         self.carpenter = None
 
     def set_ctx_manager(self, context_manager):
@@ -17,7 +16,7 @@ class ResponseValidator(object):
         self.carpenter = self.context_manager.of(Carpenter)
 
     def get_list(self, key):
-        return ResponseListChecker(self.context_manager, self.identifier_registry, key)
+        return ResponseListChecker(self.context_manager, key)
 
     def assert_status(self, status):
         status_code = HttpStatusCodeUtils.name_to_code(status)

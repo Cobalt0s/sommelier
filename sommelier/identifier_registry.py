@@ -1,4 +1,4 @@
-from sommelier.utils.identifier_resolver import resolve_alias, create_alias
+from sommelier.behave_wrapper import LabelingMachine
 
 
 class IdentifierRegistry:
@@ -16,7 +16,9 @@ class IdentifierRegistry:
         self.context_manager.set('user_id', None)
         self.context_manager.set('roles', {})
 
-    def create_alias_from_response(self, alias_id, key=None):
+    def create_alias_from_response(self, alias, key):
+        # TODO a general response manager should exist
+        # TODO identifier registry should be repurposed to UserRegistry
         # Try to get id from the last response data
         code = self.context_manager.status_code()
 
@@ -24,22 +26,13 @@ class IdentifierRegistry:
             code < 300,
             f'Response is not ok "{code}", cannot extract id',
         )
-
         json = self.context_manager.get_json()
-        if key is not None:
-            create_alias(self.context_manager, alias_id, json.get(key))
-        else:
-            create_alias(self.context_manager, alias_id, json.get('id'))
-
-    def create_alias(self, alias_id, identifier):
-        create_alias(self.context_manager, alias_id, identifier)
-
-    def resolve_alias(self, alias_id):
-        return resolve_alias(self.context_manager, alias_id)
+        self.context_manager.of(LabelingMachine).create_alias(alias, json.get(key))
 
     def select_user(self, user_alias):
-        self.context_manager.set('user_id', resolve_alias(self.context_manager, user_alias))
+        user_id = self.context_manager.of(LabelingMachine).find(user_alias)
+        self.context_manager.set('user_id', user_id)
 
     def grant_user_role(self, user_alias, role):
-        user_id = resolve_alias(self.context_manager, user_alias)
+        user_id = self.context_manager.of(LabelingMachine).find(user_alias)
         self.context_manager.set(f'roles.{user_id}', role)

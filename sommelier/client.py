@@ -1,21 +1,23 @@
 import requests
 
+from sommelier.behave_wrapper import LabelingMachine
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.utils import UrlUtils
 
 
 class ApiClient:
 
-    def __init__(self, identifier_registry, host_url):
+    def __init__(self, host_url):
         self.context_manager = None
         self.host_url = f'http://{host_url}'
-        self.identifier_registry = identifier_registry
         self.is_cookie_header = False
         self.carpenter = None
+        self.labeling_machine = None
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
         self.carpenter = self.context_manager.of(Carpenter)
+        self.labeling_machine = self.context_manager.of(LabelingMachine)
 
     def use_cookie_header(self):
         self.is_cookie_header = True
@@ -36,9 +38,7 @@ class ApiClient:
         }
 
     def create_url(self, identifiers, url):
-        resolved_ids = []
-        for i in identifiers:
-            resolved_ids.append(self.identifier_registry.resolve_alias(i))
+        resolved_ids = self.labeling_machine.find_many(identifiers)
         return self.host_url + url.format(*resolved_ids)
 
     def get(self, url, identifiers):

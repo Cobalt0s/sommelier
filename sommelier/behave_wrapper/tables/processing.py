@@ -13,7 +13,14 @@ TABLE_SPECIAL_VALUES = {
 def process_json_value(context_manager, value):
     value = value.upper()
     if value not in TABLE_SPECIAL_VALUES:
-        return context_manager.of(LabelingMachine).resolve_or_tautology(value)
+        if StringUtils.is_variable(value):
+            alias = StringUtils.extract_variable(value)
+            if alias == StringUtils.RANDOM_VAR:
+                return StringUtils.get_random_string(10)
+            # this alias is an abstraction of an actual value, need to resolve
+            return context_manager.of(LabelingMachine).find(alias)
+        # value is raw, acts as tautology, value comes in and goes out
+        return value
     return TABLE_SPECIAL_VALUES[value]
 
 

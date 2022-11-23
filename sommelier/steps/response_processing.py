@@ -5,6 +5,7 @@ from behave import given, then, when
 
 from sommelier import response_validator, pagination_navigator, identifier_registry
 from sommelier.assertions import AssertionMethod
+from sommelier.behave_wrapper import LabelingMachine
 from sommelier.utils import StringUtils
 
 
@@ -55,7 +56,7 @@ def count_elements_on_page(context, zoom, amount):
 
 @when('Save id as {item_id}')
 def save_item_id(context, item_id):
-    identifier_registry.create_alias_from_response(item_id)
+    identifier_registry.create_alias_from_response(item_id, 'id')
 
 
 @when('Save id located in {key} as {item_id}')
@@ -66,7 +67,7 @@ def save_item_id_with_zoom(context, key, item_id):
 @given('Define uuid for list {definitions}')
 def define_uuids(context, definitions):
     for d in StringUtils.comma_separated_to_list(definitions):
-        identifier_registry.create_alias(d, str(uuid4()))
+        context.ctx_manager.of(LabelingMachine).create_alias(d, str(uuid4()))
 
 
 @when('I use next page cursor')
@@ -99,4 +100,4 @@ def wait_ms(context, duration):
 def select_object_and_save(context, item_id):
     json = context.ctx_manager.get_json()
     identifier = json.get('data.[0].id').raw_str()
-    identifier_registry.create_alias(item_id, identifier)
+    context.ctx_manager.of(LabelingMachine).create_alias(item_id, identifier)

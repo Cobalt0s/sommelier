@@ -1,10 +1,10 @@
 import os
 
-from sommelier import identifier_registry, ApiClient, EventManager
+from sommelier import ApiClient, EventManager
 
 SVC_HOST = os.getenv("SVC_HOST")
 
-api = ApiClient(identifier_registry, SVC_HOST)
+api = ApiClient(SVC_HOST)
 
 KAFKA_HOST = os.getenv("KAFKA_HOST")
 
