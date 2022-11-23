@@ -1,75 +1,7 @@
 import json
+from typing import Tuple
 
 from sommelier.utils import StringUtils
-from sommelier.utils.identifier_resolver import resolve_id_or_tautology
-
-
-def table_as_2d_list(context_manager, position_of_value=1):
-    list_2d = _table_to_2d_list(get_table(context_manager))
-
-    result = []
-    for item in list_2d:
-        value = item[position_of_value]
-        if StringUtils.is_array(value):
-            value_result = []
-            arr = StringUtils.extract_array(value)
-            for x in StringUtils.comma_separated_to_list(arr):
-                if x:
-                    value_result.append(parse_json_value(context_manager, x))
-        else:
-            value_result = parse_json_value(context_manager, value)
-
-        key = item[0]
-        if position_of_value == 1:
-            result.append([key, value_result])
-        else:
-            result.append(value_result)
-    return result
-
-
-def parse_json_value(context_manager, value):
-    if value == "True" or value == "true":
-        return True
-    if value == "False" or value == "false":
-        return False
-    if value == "None" or value.lower() == "null":
-        return None
-    if value == "{}":
-        return {}
-    return resolve_id_or_tautology(context_manager, value)
-
-
-def get_table(context_manager):
-    payload = context_manager.get('payload')
-    if payload is not None:
-        table = []
-        for k in payload:
-            v = payload[k]
-            if isinstance(v, dict):
-                raise Exception("nested dictionaries for context.payload is not supported")
-            table.append([k, v])
-        # Clear the payload variable as it is temporary passed for side effects
-        context_manager.set('payload', None)
-        return CustomTable(table)
-    return context_manager.table()
-
-
-class CustomTable:
-
-    def __init__(self, rows):
-        self.rows = rows
-
-
-def _table_to_2d_list(table):
-    if isinstance(table, CustomTable):
-        return table.rows
-
-    if table is None:
-        return []
-    result = [table.headings]
-    for row in table:
-        result.append(row.cells)
-    return result
 
 
 def expand_nested_keys(payload):
@@ -132,21 +64,18 @@ def _convert_indexed_obj_to_arr(payload):
         return payload
 
 
-def display(data):
-    print(json.dumps(data, ensure_ascii=False, sort_keys=True, indent=4))
-
-
-def perform_check(given, expected):
-    result = expand_nested_keys(given)
-    ok = (expected == result)
-    if not ok:
-        display(expected)
-        display(result)
-    else:
-        print("Successful")
-
-
 if __name__ == '__main__':
+    def display(data):
+        print(json.dumps(data, ensure_ascii=False, sort_keys=True, indent=4))
+
+    def perform_check(given, expected):
+        result = expand_nested_keys(given)
+        ok = (expected == result)
+        if not ok:
+            display(expected)
+            display(result)
+        else:
+            print("Successful")
     test_cases = [
         {
             "given": {
@@ -195,3 +124,45 @@ if __name__ == '__main__':
 
     for v in test_cases:
         perform_check(v["given"], v["expected"])
+
+
+class TableXDimensions(object):
+    # Represents parsed Behave Table
+
+    def __init__(self, data) -> None:
+        self.data = data
+
+    def rows(self):
+        # Can iterate over each row
+        pass
+
+
+class Table2D(TableXDimensions):
+    # Contains 2 columns
+
+    def __init__(self, data) -> None:
+        super().__init__(data)
+
+    def rows(self) -> Tuple[str, str]:
+        for row in self.data:
+            yield str(row[0]), str(row[1])
+
+    def dict(self) -> dict:
+        # convert from CSV notation to JSON aka Python dictionary
+        payload = dict(self.data)
+        return expand_nested_keys(payload)
+
+
+class Table1D(TableXDimensions):
+    # Contains 1 column
+
+    def __init__(self, data) -> None:
+        super().__init__(data)
+
+    def rows(self) -> str:
+        for row in self.data:
+            yield str(row[0])
+
+    def list(self) -> list:
+        return self.data
+

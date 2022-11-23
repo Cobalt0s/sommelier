@@ -1,5 +1,6 @@
 from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
+from sommelier.behave_wrapper.tables import Carpenter
 
 
 class WsSocketManager:
@@ -13,10 +14,12 @@ class WsSocketManager:
         self.svc_host = svc_host
         self.svc_port = svc_port
         self.context_manager = None
+        self.carpenter = None
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
         self.client.set_ctx_manager(context_manager)
+        self.carpenter = self.context_manager.of(Carpenter)
 
     def create_socket(self, ws_name, cookie, topics):
         self.client.post(
@@ -38,5 +41,5 @@ class WsSocketManager:
     def write_message_to_topic(self, ws_name, topic):
         self.client.post(
             f'/sockets/{ws_name}/topics/{topic}/messages',
-            json=self.context_manager.get_table_dict()
+            json=self.carpenter.builder().double().dict()
         )

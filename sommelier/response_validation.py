@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sommelier.assertions import ResponseListChecker, AssertionMethodProvider, AssertionMethod
+from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.utils import HttpStatusCodeUtils
 
 
@@ -9,9 +10,11 @@ class ResponseValidator(object):
     def __init__(self, identifier_registry):
         self.context_manager = None
         self.identifier_registry = identifier_registry
+        self.carpenter = None
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
+        self.carpenter = self.context_manager.of(Carpenter)
 
     def get_list(self, key):
         return ResponseListChecker(self.context_manager, self.identifier_registry, key)
@@ -32,7 +35,7 @@ class ResponseValidator(object):
         if details is None:
             # We have a dictionary of values to see in details
             assert code == failure_code, f"Expected error of failure '{code}' actual '{failure_code}'"
-            expected_details = self.context_manager.get_table_dict()
+            expected_details = self.carpenter.builder().double().dict()
             for key in expected_details:
                 x = expected_details[key]
                 y = failure_details.get(key)
@@ -58,7 +61,7 @@ class ResponseValidator(object):
 
         code = 'missing-required-values'
         assert code == failure_code, f"Expected error of failure {code} actual '{failure_code}'"
-        missing_values = self.context_manager.column_list()
+        missing_values = self.carpenter.builder().singular().list()
 
         failure_details.sort()
         missing_values.sort()
@@ -71,7 +74,7 @@ class ResponseValidator(object):
         self._apply_assert(key, AssertionMethodProvider.of(assertion_method))
 
     def contains_keys(self):
-        expected_keys = self.context_manager.column_list()
+        expected_keys = self.carpenter.builder().singular().list()
         j = self.context_manager.get_json()
         missing_keys = []
         for k in expected_keys:

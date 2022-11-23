@@ -1,5 +1,6 @@
 from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
+from sommelier.behave_wrapper.tables import Carpenter
 
 
 class APIMockManager(object):
@@ -9,6 +10,7 @@ class APIMockManager(object):
         require_var(port, "port")
         self.client = SimpleApiClient(host, port)
         self.context_manager = None
+        self.carpenter = None
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
@@ -18,6 +20,7 @@ class APIMockManager(object):
             'services': {},
             'current': {},
         })
+        self.carpenter = self.context_manager.of(Carpenter)
 
     def define_svc_ports(self, services, ports):
         for i in range(len(services)):
@@ -60,13 +63,13 @@ class APIMockManager(object):
         })
 
     def add_headers_to_current_mock(self):
-        self._update_current_mock('headers', self.context_manager.get_table_dict())
+        self._update_current_mock('headers', self.carpenter.builder().double().dict())
 
     def add_request_to_current_mock(self):
-        self._update_current_mock('request', self.context_manager.get_table_dict())
+        self._update_current_mock('request', self.carpenter.builder().double().dict())
 
     def add_response_to_current_mock(self):
-        self._update_current_mock('response', self.context_manager.get_table_dict())
+        self._update_current_mock('response', self.carpenter.builder().double().dict())
 
     def add_response_status_to_current_mock(self, status):
         self._update_current_mock('statusCode', status)

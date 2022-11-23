@@ -1,5 +1,7 @@
 import json
 
+from sommelier.behave_wrapper import LabelingMachine
+
 
 class Judge:
 
@@ -62,12 +64,13 @@ def pretty(context_manager, data):
 
 
 def find_alias(context_manager, value):
-    id_aliases = context_manager.get('id_aliases')
-    for k in id_aliases:
-        v = id_aliases[k]
-        if v == value:
-            return f'🍹{k} ({v})'
-    return value
+    alias = context_manager.of(LabelingMachine).alias_of(value)
+    if alias is None:
+        return value
+    # we found alias name,
+    # mark with drink to indicate that sommelier made it readable
+    # some generated ids differ from call to call, but they are referred in tests by the developer with aliases
+    return f'🍹{alias} ({value})'
 
 
 def __resolve_list(context_manager, arr):

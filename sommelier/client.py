@@ -1,5 +1,6 @@
 import requests
 
+from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.utils import UrlUtils
 
 
@@ -10,9 +11,11 @@ class ApiClient:
         self.host_url = f'http://{host_url}'
         self.identifier_registry = identifier_registry
         self.is_cookie_header = False
+        self.carpenter = None
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
+        self.carpenter = self.context_manager.of(Carpenter)
 
     def use_cookie_header(self):
         self.is_cookie_header = True
@@ -42,7 +45,7 @@ class ApiClient:
         self.context_manager.set('requests_verb', "GET")
         pagination = self.context_manager.get('pagination')
         self.context_manager.set('url', self.create_url(identifiers, url) + UrlUtils.make_query_params(
-            self.context_manager.get_table_dict(), pagination
+            self.carpenter.builder().double().dict(), pagination
         ))
         self.context_manager.set('result', requests.get(
             self.context_manager.get('url'),
@@ -55,7 +58,7 @@ class ApiClient:
         self.context_manager.set('url', self.create_url(identifiers, url))
         result = requests.post(
             self.context_manager.get('url'),
-            json=self.context_manager.get_table_dict(),
+            json=self.carpenter.builder().double().dict(),
             headers=self.get_headers())
         self.context_manager.set('result', result)
         return
@@ -65,7 +68,7 @@ class ApiClient:
         self.context_manager.set('url', self.create_url(identifiers, url))
         result = requests.put(
             self.context_manager.get('url'),
-            json=self.context_manager.get_table_dict(),
+            json=self.carpenter.builder().double().dict(),
             headers=self.get_headers())
         self.context_manager.set('result', result)
         return

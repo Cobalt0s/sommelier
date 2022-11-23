@@ -1,6 +1,3 @@
-import random
-import string
-
 from sommelier.logging import log_info
 from sommelier.utils import StringUtils
 
@@ -28,8 +25,8 @@ def resolve_alias(context_manager, alias_id):
 def resolve_id_or_tautology(context_manager, item):
     if StringUtils.is_variable(item):
         item = StringUtils.extract_variable(item)
-        if item == '#':
-            return ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+        if item == StringUtils.RANDOM_VAR:
+            return StringUtils.get_random_string(10)
         return resolve_alias(context_manager, item)
 
     return item

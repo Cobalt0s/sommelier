@@ -10,6 +10,8 @@ DOT = "."
 
 class StringUtils:
 
+    RANDOM_VAR = '#'
+
     @staticmethod
     def comma_separated_to_list(text):
         return text.replace(SPACE, EMPTY).split(COMMA)

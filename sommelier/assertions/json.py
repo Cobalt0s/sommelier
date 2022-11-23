@@ -1,5 +1,6 @@
 from enum import Enum
 
+from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.logging import find_alias
 
 
@@ -10,7 +11,7 @@ def _bool_operation(use_or):
 
 
 def assert_json_properties_in_object(context_manager, json):
-    for zoom, expected_value in context_manager.get_table_2d().items():
+    for zoom, expected_value in context_manager.of(Carpenter).builder().double().rows():
         given_value = str(json.get(zoom).raw())
 
         context_manager.judge().expectation(
@@ -20,7 +21,7 @@ def assert_json_properties_in_object(context_manager, json):
 
 
 def _assert_json_properties_in_list(context_manager, json, contains):
-    for zoom, expected_value in context_manager.get_table_2d().items():
+    for zoom, expected_value in context_manager.of(Carpenter).builder().double().rows():
         assertion_flag = not contains
         operation = _bool_operation(use_or=contains)
         for v in json.retriever_array():

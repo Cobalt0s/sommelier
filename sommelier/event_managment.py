@@ -1,10 +1,10 @@
 import copy
 
-from sommelier.utils.json_helpers import JsonRetriever
-
+from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.logging import pretty
 
 from sommelier.events import EventConsumer, EventProducer
+from sommelier.utils import JsonRetriever
 
 
 def events_equal(context_manager, expected_event, given_event, ignored_keys):
@@ -75,9 +75,11 @@ class EventManager:
         self.event_consumer = EventConsumer(host)
         self.event_producer = EventProducer(host)
         self.wait_timeout = wait_timeout
+        self.carpenter = None
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
+        self.carpenter = self.context_manager.of(Carpenter)
 
     def reset(self):
         self.context_manager.set('events', {})
@@ -105,11 +107,11 @@ class EventManager:
         self._save_expected_event(topic_name, is_expected, {
             'authorId': author_id,
             'type': topic_type,
-            'payload': self.context_manager.get_table_dict(),
+            'payload': self.carpenter.builder().double().dict(),
         })
 
     def save_expected_event(self, topic_name, is_expected, name=None):
-        self._save_expected_event(topic_name, is_expected, self.context_manager.get_table_dict(), name)
+        self._save_expected_event(topic_name, is_expected, self.carpenter.builder().double().dict(), name)
 
     def _collect_events(self, drain_timeout=None):
         event_registry = {}
@@ -125,7 +127,7 @@ class EventManager:
         self.context_manager.set('events', {})
 
     def produce_event(self, topic):
-        message = self.context_manager.get_table_dict()
+        message = self.carpenter.builder().double().dict()
         self.event_producer.send_message(topic, message)
 
     def drain_events(self, topic):
