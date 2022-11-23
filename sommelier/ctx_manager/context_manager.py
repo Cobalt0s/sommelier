@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from sommelier.logging import Judge, log_error, log_fatal
 from sommelier.utils import JsonRetriever, StringUtils
 from sommelier.utils.assertions import assert_json_properties_in_object
@@ -6,6 +8,24 @@ from sommelier.utils.data_table_converter import table_as_2d_list, expand_nested
 # TODO all managers should register, rely on the context wrapper
 # behave provides context variable which we operate on
 # ideally all possible context interactions should be listed in here
+
+
+class Table2D(object):
+
+    def __init__(self, data) -> None:
+        self.data = data
+
+    def items(self) -> Tuple[str, str]:
+        for row in self.data:
+            yield str(row[0]), str(row[1])
+
+
+class TableJson(object):
+
+    def __init__(self, data) -> None:
+        # TODO make use!
+        self.data = data
+
 
 class ContextManager(object):
 
@@ -37,9 +57,12 @@ class ContextManager(object):
         except Exception:
             self.log_fatal(f"couldn't find {key} in ctx manager")
 
-    def get_table_dict(self):
+    def get_table_dict(self) -> dict:
         payload = dict(table_as_2d_list(self))
         return expand_nested_keys(payload)
+
+    def get_table_2d(self) -> Table2D:
+        return Table2D(table_as_2d_list(self))
 
     def get_json(self):
         try:
@@ -71,10 +94,6 @@ class ContextManager(object):
         # if value already exists we do NOT touch it
         if key not in self.master:
             self.master[key] = {}
-
-    def assert_json_properties_in_object(self):
-        json = self.get_json()
-        assert_json_properties_in_object(self, json)
 
     def log_error(self, text, extra_details=None):
         log_error(self, text, extra_details)

@@ -1,6 +1,5 @@
 from sommelier import SimpleApiClient
-
-from sommelier.utils.assertions import require_var
+from sommelier.assertions import require_var
 
 
 class WsSocketManager:

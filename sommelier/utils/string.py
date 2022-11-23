@@ -49,3 +49,8 @@ class StringUtils:
         # choose from all lowercase letter
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
+
+    @staticmethod
+    def is_empty(text):
+        return text is None or text == ""
+

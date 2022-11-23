@@ -1,26 +1,14 @@
-from sommelier.assertions import ResponseListChecker
+from typing import Optional
+
+from sommelier.assertions import ResponseListChecker, AssertionMethodProvider, AssertionMethod
 from sommelier.utils import HttpStatusCodeUtils
-from sommelier.utils.assertions import (
-    assert_json_properties_in_object,
-    assert_json_properties_in_list,
-    assert_json_properties_not_in_list,
-)
 
 
 class ResponseValidator(object):
 
-    IN_OBJECT = 1
-    IN_LIST = 2
-    NOT_IN_LIST = 3
-
     def __init__(self, identifier_registry):
         self.context_manager = None
         self.identifier_registry = identifier_registry
-        self.assertion_methods = {
-            self.IN_OBJECT: assert_json_properties_in_object,
-            self.IN_LIST: assert_json_properties_in_list,
-            self.NOT_IN_LIST: assert_json_properties_not_in_list,
-        }
 
     def set_ctx_manager(self, context_manager):
         self.context_manager = context_manager
@@ -30,7 +18,8 @@ class ResponseValidator(object):
 
     def assert_status(self, status):
         status_code = HttpStatusCodeUtils.name_to_code(status)
-        self.context_manager.judge().assumption(status_code is not None, f'status code {status.upper()} is not supported')
+        self.context_manager.judge().assumption(status_code is not None,
+                                                f'status code {status.upper()} is not supported')
         self.context_manager.judge().expectation(
             status_code == self.context_manager.status_code(),
             f"Expected {status_code} given {self.context_manager.status_code()}"
@@ -76,13 +65,10 @@ class ResponseValidator(object):
 
         assert missing_values == failure_details, f"Expected {missing_values} actual {failure_details} in error details"
 
-    def contains_data(self, item_key=None, assertion_type=None):
-        if item_key is None:
-            self.context_manager.assert_json_properties_in_object()
-        else:
-            if assertion_type is None:
-                raise Exception(f'Specify an assertion method for {item_key}, ex: list/object')
-            self._apply_assert(item_key, self.assertion_methods[assertion_type])
+    def contains_data(self,
+                      key: Optional[str] = None,
+                      assertion_method: AssertionMethod = AssertionMethod.IN_OBJECT):
+        self._apply_assert(key, AssertionMethodProvider.of(assertion_method))
 
     def contains_keys(self):
         expected_keys = self.context_manager.column_list()
@@ -96,7 +82,7 @@ class ResponseValidator(object):
             f"Response doesn't include keys: {missing_keys}"
         )
 
-    def _apply_assert(self, item_key, assertion_func):
+    def _apply_assert(self, key, assertion_func):
         """
         Apply assert function on the nested object located under the key.
         Example:
@@ -104,7 +90,9 @@ class ResponseValidator(object):
             you can apply assertion on list or object via assertion_func
             located under item_key which is x or y in our case
         """
-        assertion_func(self.context_manager, self.context_manager.get_json().get(item_key))
+        j = self.context_manager.get_json()
+        data = j.get(key)
+        assertion_func(self.context_manager, data)
 
     def count_data(self, zoom, amount):
         amount = int(amount)

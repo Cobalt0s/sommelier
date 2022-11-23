@@ -65,6 +65,9 @@ class JsonRetriever:
 
     def get(self, zoom, strict=True):
         given_value = self
+        if StringUtils.is_empty(zoom):
+            return given_value
+
         for key in StringUtils.dot_separated_to_list(zoom):
             given_value = given_value.__get(key, strict)
             if given_value is None:

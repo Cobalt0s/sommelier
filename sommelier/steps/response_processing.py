@@ -4,6 +4,7 @@ from uuid import uuid4
 from behave import given, then, when
 
 from sommelier import response_validator, pagination_navigator, identifier_registry
+from sommelier.assertions import AssertionMethod
 from sommelier.utils import StringUtils
 
 
@@ -34,17 +35,17 @@ def contains_keys(context):
 
 @then('Contains properties inside object named {item_key}')
 def contains_properties(context, item_key):
-    response_validator.contains_data(item_key, response_validator.IN_OBJECT)
+    response_validator.contains_data(item_key, AssertionMethod.IN_OBJECT)
 
 
 @then('Contains properties inside list named {item_key}')
 def contains_properties(context, item_key):
-    response_validator.contains_data(item_key, response_validator.IN_LIST)
+    response_validator.contains_data(item_key, AssertionMethod.IN_LIST)
 
 
 @then('Does not contain properties inside list {item_key}')
 def contains_properties(context, item_key):
-    response_validator.contains_data(item_key, response_validator.NOT_IN_LIST)
+    response_validator.contains_data(item_key, AssertionMethod.NOT_IN_LIST)
 
 
 @then('Number of {zoom} on page is {amount}')
