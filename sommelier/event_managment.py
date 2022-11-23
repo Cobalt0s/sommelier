@@ -16,10 +16,7 @@ def events_equal(context_manager, expected_event, given_event, ignored_keys):
         a.delete(key)
         b.delete(key)
 
-    a.sort()
-    b.sort()
-
-    return a.raw() == b.raw()
+    return a.equals(b)
 
 
 def validate_events_for_topic(context_manager, event_registry, expected_events, topic, ignored_keys=None):

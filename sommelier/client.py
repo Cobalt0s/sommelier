@@ -1,6 +1,6 @@
 import requests
 
-from sommelier.utils.query_param_handler import query_params
+from sommelier.utils import UrlUtils
 
 
 class ApiClient:
@@ -41,8 +41,8 @@ class ApiClient:
     def get(self, url, identifiers):
         self.context_manager.set('requests_verb', "GET")
         pagination = self.context_manager.get('pagination')
-        self.context_manager.set('url', self.create_url(identifiers, url) + query_params(
-            pagination, self.context_manager.get_table_dict()
+        self.context_manager.set('url', self.create_url(identifiers, url) + UrlUtils.make_query_params(
+            self.context_manager.get_table_dict(), pagination
         ))
         self.context_manager.set('result', requests.get(
             self.context_manager.get('url'),

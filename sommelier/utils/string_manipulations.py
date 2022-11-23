@@ -1,3 +1,6 @@
+import random
+import string
+
 EMPTY = ""
 SPACE = " "
 DOUBLE_SPACE = SPACE + SPACE
@@ -40,3 +43,9 @@ class StringUtils:
         if StringUtils.is_variable(text):
             return text[1:]
         return text
+
+    @staticmethod
+    def get_random_string(length):
+        # choose from all lowercase letter
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(length))

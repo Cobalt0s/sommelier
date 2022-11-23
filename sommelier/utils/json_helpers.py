@@ -1,3 +1,4 @@
+from sommelier.utils import DictUtils
 from sommelier.utils.string_manipulations import StringUtils
 
 
@@ -176,7 +177,12 @@ class JsonRetriever:
         return self.data
 
     def sort(self):
-        sort_dict(self.data)
+        DictUtils.sort_dict(self.data)
+
+    def equals(self, other) -> bool:
+        self.sort()
+        other.sort()
+        return self.raw() == other.raw()
 
     def is_array(self):
         return isinstance(self.data, list)
@@ -195,15 +201,6 @@ def get_json(context_manager):
         context_manager.log_error(f'json is not an object, got: {data}')
     except Exception:
         context_manager.log_error(f'json is missing in response with status {context_manager.status_code()}')
-
-
-def sort_dict(obj):
-    for k in obj:
-        o = obj[k]
-        if isinstance(o, dict):
-            sort_dict(o)
-        if isinstance(o, list):
-            o.sort()
 
 
 if __name__ == '__main__':
