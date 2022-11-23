@@ -1,8 +1,8 @@
 from behave import given, then
 
-from sommelier.utils.string_manipulations import StringUtils
-
 from features import apiMockManager
+
+from sommelier.utils import StringUtils
 
 
 @given('Associate svc {services} with ports {ports}')

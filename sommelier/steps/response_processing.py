@@ -4,7 +4,7 @@ from uuid import uuid4
 from behave import given, then, when
 
 from sommelier import response_validator, pagination_navigator, identifier_registry
-from sommelier.utils.string_manipulations import StringUtils
+from sommelier.utils import StringUtils
 
 
 @then('Response status is {status}')

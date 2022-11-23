@@ -2,7 +2,7 @@ from behave import then, when, given
 
 from features import event_manager
 
-from sommelier.utils.string_manipulations import StringUtils
+from sommelier.utils import StringUtils
 
 
 @then('Event on topic {topic_name} is expected to be emitted')

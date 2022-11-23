@@ -1,10 +1,10 @@
 from typing import Optional
 
 from flask import request
-from sommelier.utils.string_manipulations import StringUtils
 
 from sommelier.rest_mock import app
 from sommelier.rest_mock.registry import service_mock_registry
+from sommelier.utils import StringUtils
 
 
 @app.get("/mocks/services")

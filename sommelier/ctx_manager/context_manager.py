@@ -1,9 +1,8 @@
 from sommelier.logging import Judge, log_error, log_fatal
-from sommelier.utils import JsonRetriever
+from sommelier.utils import JsonRetriever, StringUtils
 from sommelier.utils.assertions import assert_json_properties_in_object
 from sommelier.utils.data_table_converter import table_as_2d_list, expand_nested_keys
 from sommelier.utils.list_lookup import context_contains, context_missing
-from sommelier.utils.string_manipulations import StringUtils
 
 # TODO all managers should register, rely on the context wrapper
 # behave provides context variable which we operate on

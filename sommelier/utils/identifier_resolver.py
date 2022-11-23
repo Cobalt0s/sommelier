@@ -2,7 +2,7 @@ import random
 import string
 
 from sommelier.logging import log_info
-from sommelier.utils.string_manipulations import StringUtils
+from sommelier.utils import StringUtils
 
 
 def create_alias(context_manager, alias_id, identifier):

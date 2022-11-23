@@ -1,7 +1,7 @@
 import json
 
+from sommelier.utils import StringUtils
 from sommelier.utils.identifier_resolver import resolve_id_or_tautology
-from sommelier.utils.string_manipulations import StringUtils
 
 
 def table_as_2d_list(context_manager, position_of_value=1):
