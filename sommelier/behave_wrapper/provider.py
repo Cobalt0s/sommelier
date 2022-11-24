@@ -1,6 +1,6 @@
 from behave.runner import Context
 
-from sommelier.ctx_manager import ContextManager
+from sommelier.behave_wrapper import ContextManager
 
 
 class ContextProvider(object):

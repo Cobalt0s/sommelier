@@ -1,8 +1,8 @@
 from typing import Optional
 
-from sommelier.behave_wrapper import ResponseJsonHolder
+from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import DrunkLogger, StringFormatter
-from sommelier.ctx_manager import FlowListener
+from sommelier.behave_wrapper.responses import ResponseJsonHolder
 
 
 class Judge(FlowListener):

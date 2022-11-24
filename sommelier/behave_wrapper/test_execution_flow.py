@@ -1,8 +1,8 @@
 import copy
 from typing import List
 
-from sommelier.ctx_manager import ContextManager
-from sommelier.ctx_manager.provider import ContextProvider
+from sommelier.behave_wrapper import ContextManager
+from sommelier.behave_wrapper.provider import ContextProvider
 
 
 class FlowListener(object):

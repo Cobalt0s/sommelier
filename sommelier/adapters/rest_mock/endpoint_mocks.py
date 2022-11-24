@@ -1,8 +1,8 @@
 from flask import request
 
-from sommelier.rest_mock import app
-from sommelier.rest_mock.registry import service_mock_registry
-from sommelier.rest_mock.service_mocks import generate_id_on_none
+from sommelier.adapters.rest_mock import app
+from sommelier.adapters.rest_mock.registry import service_mock_registry
+from sommelier.adapters.rest_mock.service_mocks import generate_id_on_none
 
 
 @app.get("/mocks/services/<service_id>/endpoints")

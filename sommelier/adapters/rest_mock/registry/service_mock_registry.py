@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from sommelier.rest_mock.registry.application_runner import ApplicationRunner
-from sommelier.rest_mock.registry.endpoints_mock_registry import EndpointsMockRegistry
+from sommelier.adapters.rest_mock.registry.application_runner import ApplicationRunner
+from sommelier.adapters.rest_mock.registry.endpoints_mock_registry import EndpointsMockRegistry
 
 
 class ServiceMock(object):

@@ -1,11 +1,27 @@
-from sommelier.ctx_manager import global_test_flow_controller as test_flow_controller
-from sommelier.client import ApiClient, SimpleApiClient
-from sommelier.event_managment import EventManager
-from sommelier.identifier_registry import UserRegistry
-from sommelier.page_navigation import PaginationNavigator
-from sommelier.response_validation import ResponseValidator
-from sommelier.web_socket import WsSocketManager
+from sommelier.behave_wrapper import LabelingMachine
+from sommelier.behave_wrapper import BeautyPrinter, Judge, DrunkLogger
+from sommelier.behave_wrapper import ResponseJsonHolder
+from sommelier.behave_wrapper import Carpenter
+
+from sommelier.managers import (
+    APIMockManager, ApiClient, SimpleApiClient,
+    ResponseValidator,
+    EventManager, WsSocketManager,
+    UserRegistry, PaginationNavigator)
 
 if __name__ == "__main__":
+    # APIMockManager()
+    # ApiClient()
+    # SimpleApiClient()
+    # EventManager()
+    # UserRegistry()
+    # PaginationNavigator()
+    # ResponseValidator()
+    # WsSocketManager()
+    # LabelingMachine()
+    # BeautyPrinter()
+    # Judge()
+    # DrunkLogger()
+    # ResponseJsonHolder()
+    # Carpenter()
     print("finished")
-

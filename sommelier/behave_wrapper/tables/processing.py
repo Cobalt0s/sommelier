@@ -1,4 +1,4 @@
-from sommelier.behave_wrapper import LabelingMachine
+from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.utils import StringUtils
 
 TABLE_SPECIAL_VALUES = {

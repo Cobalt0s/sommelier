@@ -1,8 +1,8 @@
 from typing import Optional
 
-from sommelier.behave_wrapper import ResponseJsonHolder
+from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import Judge
-from sommelier.ctx_manager import FlowListener
+from sommelier.behave_wrapper.responses import ResponseJsonHolder
 
 
 class PaginationNavigator(FlowListener):

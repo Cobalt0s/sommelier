@@ -1,6 +1,6 @@
 from behave import given
 
-from sommelier import identifier_registry
+from sommelier.managers import identifier_registry
 
 
 @given('I am user {user_name}')

@@ -1,6 +1,6 @@
-from sommelier.behave_wrapper import LabelingMachine, ResponseJsonHolder
-
+from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.behave_wrapper.logging import StringFormatter, Judge
+from sommelier.behave_wrapper.responses import ResponseJsonHolder
 
 
 def context_contains(context_manager, first_key, second_key, value):

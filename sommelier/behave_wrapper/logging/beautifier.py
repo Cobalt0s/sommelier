@@ -1,9 +1,9 @@
 import json
 from typing import Optional, Union
 
-from sommelier.behave_wrapper import LabelingMachine
+from sommelier.behave_wrapper import FlowListener
+from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.behave_wrapper.logging import StringFormatter
-from sommelier.ctx_manager import FlowListener
 
 
 class BeautyPrinter(FlowListener):

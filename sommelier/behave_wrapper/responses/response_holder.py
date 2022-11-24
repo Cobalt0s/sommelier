@@ -1,8 +1,8 @@
 from typing import Optional
 
+from sommelier.behave_wrapper import FlowListener
+from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.utils import JsonRetriever
-from sommelier.behave_wrapper import LabelingMachine
-from sommelier.ctx_manager import FlowListener
 
 
 class ResponseJsonHolder(FlowListener):

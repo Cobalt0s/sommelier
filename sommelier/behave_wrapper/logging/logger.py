@@ -1,7 +1,7 @@
 from typing import Union, Optional
 
+from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import StringFormatter, BeautyPrinter
-from sommelier.ctx_manager import FlowListener
 
 
 class DrunkLogger(FlowListener):

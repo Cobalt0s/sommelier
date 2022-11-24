@@ -2,8 +2,8 @@ from typing import Optional
 
 from flask import request
 
-from sommelier.rest_mock import app
-from sommelier.rest_mock.registry import service_mock_registry
+from sommelier.adapters.rest_mock import app
+from sommelier.adapters.rest_mock.registry import service_mock_registry
 from sommelier.utils import StringUtils
 
 

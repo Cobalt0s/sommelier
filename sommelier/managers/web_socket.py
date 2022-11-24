@@ -1,7 +1,7 @@
-from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
+from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.tables import Carpenter
-from sommelier.ctx_manager import FlowListener
+from sommelier.managers import SimpleApiClient
 
 
 class WsSocketManager(FlowListener):

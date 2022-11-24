@@ -1,5 +1,5 @@
+from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.tables.builders import TableBuilder, CustomInCodeTable
-from sommelier.ctx_manager import FlowListener
 
 
 class Carpenter(FlowListener):

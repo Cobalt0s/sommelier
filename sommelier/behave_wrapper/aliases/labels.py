@@ -1,4 +1,4 @@
-from sommelier.ctx_manager import FlowListener
+from sommelier.behave_wrapper import FlowListener
 
 
 class LabelingMachine(FlowListener):

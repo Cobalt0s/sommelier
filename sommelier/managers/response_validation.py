@@ -1,10 +1,10 @@
 from typing import Optional
 
 from sommelier.assertions import ResponseListChecker, AssertionMethodProvider, AssertionMethod
-from sommelier.behave_wrapper import ResponseJsonHolder
+from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import Judge
+from sommelier.behave_wrapper.responses import ResponseJsonHolder
 from sommelier.behave_wrapper.tables import Carpenter
-from sommelier.ctx_manager import FlowListener
 from sommelier.utils import HttpStatusCodeUtils
 
 

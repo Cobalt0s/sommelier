@@ -1,5 +1,5 @@
-from sommelier.utils.u_dict import DictUtils
-from sommelier.utils.u_string import StringUtils
+from sommelier.utils.dict_utils import DictUtils
+from sommelier.utils.string_utils import StringUtils
 
 
 def correct_key_type(key):
