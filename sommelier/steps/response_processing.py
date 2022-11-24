@@ -5,7 +5,7 @@ from behave import given, then, when
 
 from sommelier import response_validator, pagination_navigator, identifier_registry
 from sommelier.assertions import AssertionMethod
-from sommelier.behave_wrapper import LabelingMachine
+from sommelier.behave_wrapper import LabelingMachine, ResponseJsonHolder
 from sommelier.utils import StringUtils
 
 
@@ -98,6 +98,7 @@ def wait_ms(context, duration):
 
 @when('Selecting one of the objects and saving as {item_id}')
 def select_object_and_save(context, item_id):
-    json = context.ctx_manager.get_json()
+    m = context.ctx_manager
+    json = m.of(ResponseJsonHolder).body()
     identifier = json.get('data.[0].id').raw_str()
-    context.ctx_manager.of(LabelingMachine).create_alias(item_id, identifier)
+    m.of(LabelingMachine).create_alias(item_id, identifier)

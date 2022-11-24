@@ -18,7 +18,6 @@ class LabelingMachine(FlowListener):
         if self.__is_permanent_mode():
             # This alias should be persisted for the whole test execution and should not be reset
             self.ctx_m().set(f'aliases_permanent.{name}', value)
-            self.ctx_m().log_info(f"ID[{name}] with Value[{value}]")
 
     def __is_permanent_mode(self) -> bool:
         return self.ctx_m().get('mode_permanent_aliases')
@@ -49,4 +48,3 @@ class LabelingMachine(FlowListener):
                 return k
         # There is no alias with such value
         return None
-

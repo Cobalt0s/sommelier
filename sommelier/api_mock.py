@@ -1,5 +1,8 @@
+from typing import Optional
+
 from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
+from sommelier.behave_wrapper import ResponseJsonHolder
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.ctx_manager import FlowListener
 
@@ -13,15 +16,15 @@ class APIMockManager(FlowListener):
                 'services': {},
                 'current': {},
             }],
-        ])
+        ], managers={
+            'carpenter': Carpenter,
+            'response': ResponseJsonHolder,
+        })
+        self.carpenter: Optional[Carpenter] = None
+        self.response: Optional[ResponseJsonHolder] = None
         require_var(host, "host")
         require_var(port, "port")
         self.client = SimpleApiClient(host, port)
-        self.carpenter = None
-
-    def before_all(self):
-        super(APIMockManager, self).before_all()
-        self.carpenter = self.ctx_m().of(Carpenter)
 
     def define_svc_ports(self, services, ports):
         for i in range(len(services)):
@@ -40,7 +43,7 @@ class APIMockManager(FlowListener):
             'url': url,
             'statusCode': status,
         })
-        identifier = self.ctx_m().get_json().get("id").raw()
+        identifier = self.response.body().get("id").raw()
 
         self._set_current_mock(alias, identifier, svc, operation, url)
         if alias is not None:
@@ -83,7 +86,7 @@ class APIMockManager(FlowListener):
 
     def is_satisfied(self):
         self.client.get('/mocks/services/unsatisfied')
-        data = self.ctx_m().get_json().get("data")
+        data = self.response.body().get("data")
         self.ctx_m().judge().expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
 
     def remove_svc(self, svc):

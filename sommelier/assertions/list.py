@@ -1,10 +1,10 @@
-from sommelier.behave_wrapper import LabelingMachine
+from sommelier.behave_wrapper import LabelingMachine, ResponseJsonHolder
 
 from sommelier.behave_wrapper.logging import StringFormatter
 
 
 def context_contains(context_manager, first_key, second_key, value):
-    data = context_manager.get_json()
+    data = context_manager.of(ResponseJsonHolder).body()
     if data.has(first_key):
         _list_search(context_manager, data.get(first_key).raw_array(), second_key, value, expected_to_find=True)
     else:
@@ -12,7 +12,7 @@ def context_contains(context_manager, first_key, second_key, value):
 
 
 def context_missing(context_manager, first_key, second_key, value):
-    data = context_manager.get_json()
+    data = context_manager.of(ResponseJsonHolder).body()
     if data.has(first_key):
         _list_search(context_manager, data.get(first_key).raw_array(), second_key, value, expected_to_find=False)
     else:

@@ -1,5 +1,5 @@
 from sommelier.behave_wrapper.logging import DrunkLogger, Judge
-from sommelier.utils import JsonRetriever, StringUtils
+from sommelier.utils import StringUtils
 
 
 # TODO all managers should register, rely on the context wrapper
@@ -34,36 +34,6 @@ class ContextManager(object):
         except Exception:
             self.log_fatal(f"couldn't find {key} in ctx manager")
 
-    def exists(self, key):
-        try:
-            self.get(key)
-            return True
-        except Exception:
-            return False
-
-    def get_json(self):
-        try:
-            data = self.response_result().json()
-            if data is None:
-                raise KeyError
-            if isinstance(data, dict):
-                return JsonRetriever(self, data)
-            self.log_error(f'json is not an object, got: {data}')
-        except Exception:
-            self.log_error(f'json is missing in response with status {self.status_code()}')
-
-    def judge(self):
-        return self.of(Judge)
-
-    def status_code(self):
-        return self.response_result().status_code
-
-    def response_result(self):
-        return self.get('result')
-
-    def response_result_has_json(self):
-        return hasattr(self.response_result(), 'json')
-
     def declare(self, key, value=None):
         if value is None:
             value = {}
@@ -71,8 +41,15 @@ class ContextManager(object):
         if key not in self.master:
             self.master[key] = value
 
-    def log_info(self, text):
-        self.of(DrunkLogger).info(text)
+    def exists(self, key):
+        try:
+            self.get(key)
+            return True
+        except Exception:
+            return False
+
+    def judge(self):
+        return self.of(Judge)
 
     def log_error(self, text, extra_details=None):
         self.of(DrunkLogger).error(text, extra_details)
@@ -88,6 +65,5 @@ class ContextManager(object):
         self.set(f"__managers__.{obj_name}", manager)
 
     def of(self, clazz):
-        # TODO fatal if doesn't exist
         obj_name = clazz.__name__
         return self.get(f"__managers__.{obj_name}")

@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sommelier.assertions import ResponseListChecker, AssertionMethodProvider, AssertionMethod
+from sommelier.behave_wrapper import ResponseJsonHolder
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.ctx_manager import FlowListener
 from sommelier.utils import HttpStatusCodeUtils
@@ -11,8 +12,10 @@ class ResponseValidator(FlowListener):
     def __init__(self):
         super().__init__(managers={
             'carpenter': Carpenter,
+            'response': ResponseJsonHolder,
         })
         self.carpenter: Optional[Carpenter] = None
+        self.response: Optional[ResponseJsonHolder] = None
 
     def get_list(self, key):
         return ResponseListChecker(self.ctx_m(), key)
@@ -22,12 +25,12 @@ class ResponseValidator(FlowListener):
         self.ctx_m().judge().assumption(status_code is not None,
                                         f'status code {status.upper()} is not supported')
         self.ctx_m().judge().expectation(
-            status_code == self.ctx_m().status_code(),
-            f"Expected {status_code} given {self.ctx_m().status_code()}"
+            status_code == self.response.status(),
+            f"Expected {status_code} given {self.response.status()}"
         )
 
     def check_failure(self, code, details=None):
-        json = self.ctx_m().get_json()
+        json = self.response.body()
         failure_code = json.get('error.code').raw_str()
         failure_details = json.get('error.details')
         if details is None:
@@ -38,7 +41,7 @@ class ResponseValidator(FlowListener):
                 x = expected_details[key]
                 y = failure_details.get(key)
                 self.ctx_m().judge().expectation(
-                    x == y.data,  ### TODO do not use .data, use getter
+                    x == y.raw(),
                     f"Expected `{x}` actual `{y}` for error.details.{key}"
                 )
         else:
@@ -53,7 +56,7 @@ class ResponseValidator(FlowListener):
             )
 
     def missing_keys(self):
-        json = self.ctx_m().get_json()
+        json = self.response.body()
         failure_code = json.get('error.code').raw_str()
         failure_details = json.get('error.details').raw_array()
 
@@ -73,7 +76,7 @@ class ResponseValidator(FlowListener):
 
     def contains_keys(self):
         expected_keys = self.carpenter.builder().singular().list()
-        j = self.ctx_m().get_json()
+        j = self.response.body()
         missing_keys = []
         for k in expected_keys:
             if not j.has(k):
@@ -91,14 +94,14 @@ class ResponseValidator(FlowListener):
             you can apply assertion on list or object via assertion_func
             located under item_key which is x or y in our case
         """
-        j = self.ctx_m().get_json()
+        j = self.response.body()
         data = j.get(key)
         assertion_func(self.ctx_m(), data)
 
     def count_data(self, zoom, amount):
         amount = int(amount)
 
-        json = self.ctx_m().get_json()
+        json = self.response.body()
         elements = json.get(zoom).raw_array()
         size = len(elements)
         self.ctx_m().judge().expectation(

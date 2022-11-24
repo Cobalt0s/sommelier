@@ -1,1 +1,2 @@
 from sommelier.behave_wrapper.labels import LabelingMachine
+from sommelier.behave_wrapper.response_holder import ResponseJsonHolder

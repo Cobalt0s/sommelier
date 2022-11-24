@@ -1,5 +1,6 @@
 from typing import Optional
 
+from sommelier.behave_wrapper import ResponseJsonHolder
 from sommelier.behave_wrapper.logging import DrunkLogger, StringFormatter
 from sommelier.ctx_manager import FlowListener
 
@@ -9,8 +10,10 @@ class Judge(FlowListener):
     def __init__(self) -> None:
         super().__init__(managers={
             'drunk_logger': DrunkLogger,
+            'response': ResponseJsonHolder,
         })
         self.drunk_logger: Optional[DrunkLogger] = None
+        self.response: Optional[ResponseJsonHolder] = None
 
     def expectation(self, condition, message, extra_details=None, api_enhancements=True):
         if condition:
@@ -28,13 +31,10 @@ class Judge(FlowListener):
         if extra_details is not None:
             return extra_details
         # if no extra details where specified get them inside response holder
-        details = "No JSON"
-        if self.ctx_m().response_result_has_json():
-            try:
-                details = self.ctx_m().get_json().raw()
-            except Exception:
-                pass
-        return details
+        json = self.response.body(strict=False)
+        if json is None:
+            return "No JSON"
+        return json.raw()
 
     def assumption(self, condition, message):
         if not condition:
