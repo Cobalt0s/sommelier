@@ -1,5 +1,6 @@
 from sommelier.behave_wrapper import LabelingMachine
-from sommelier.logging import find_alias
+
+from sommelier.behave_wrapper.logging import StringFormatter
 
 
 def context_contains(context_manager, first_key, second_key, value):
@@ -32,8 +33,12 @@ def _list_search(context_manager, item_list, key, value, expected_to_find=True):
 
     context_manager.judge().expectation(
         found == expected_to_find,
-        f"Entry ['{key}': '{find_alias(context_manager, value)}'] {found_text}",
-        )
+        StringFormatter(f"Entry ['%%!': '%%alias!'] %%!", [
+            key,
+            value,
+            found_text,
+        ]),
+    )
 
 
 class ResponseListChecker(object):

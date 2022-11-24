@@ -1,7 +1,7 @@
 from enum import Enum
 
+from sommelier.behave_wrapper.logging import StringFormatter
 from sommelier.behave_wrapper.tables import Carpenter
-from sommelier.logging import find_alias
 
 
 def _bool_operation(use_or):
@@ -16,7 +16,11 @@ def assert_json_properties_in_object(context_manager, json):
 
         context_manager.judge().expectation(
             expected_value == given_value,
-            f"Expected {find_alias(context_manager, expected_value)} given {find_alias(context_manager, given_value)} for key {zoom}",
+            StringFormatter('Expected %%alias! given %%alias! for key %%!', [
+                expected_value,
+                given_value,
+                zoom,
+            ]),
         )
 
 
@@ -30,7 +34,10 @@ def _assert_json_properties_in_list(context_manager, json, contains):
 
         context_manager.judge().expectation(
             assertion_flag,
-            f"Expected {find_alias(context_manager, expected_value)} was not found inside {zoom}",
+            StringFormatter('Expected %%alias! was not found inside %%!', [
+                expected_value,
+                zoom,
+            ]),
         )
 
 

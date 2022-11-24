@@ -1,4 +1,4 @@
-from sommelier.logging import Judge, log_error, log_fatal, log_info
+from sommelier.behave_wrapper.logging import DrunkLogger, Judge
 from sommelier.utils import JsonRetriever, StringUtils
 
 
@@ -53,7 +53,7 @@ class ContextManager(object):
             self.log_error(f'json is missing in response with status {self.status_code()}')
 
     def judge(self):
-        return Judge(self)
+        return self.of(Judge)
 
     def status_code(self):
         return self.response_result().status_code
@@ -72,19 +72,13 @@ class ContextManager(object):
             self.master[key] = value
 
     def log_info(self, text):
-        log_info(text)
+        self.of(DrunkLogger).info(text)
 
     def log_error(self, text, extra_details=None):
-        log_error(self, text, extra_details)
+        self.of(DrunkLogger).error(text, extra_details)
 
     def log_fatal(self, text):
-        log_fatal(self, text)
-
-    def feature(self):
-        return self.context.feature
-
-    def scenario(self):
-        return self.context.scenario
+        self.of(DrunkLogger).fatal(text)
 
     def attach_manager(self, manager):
         obj_name = manager.__class__.__name__

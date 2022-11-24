@@ -1,10 +1,10 @@
 import copy
 from typing import Optional
 
+from sommelier.behave_wrapper.logging.format_str import StringFormatter
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.ctx_manager import FlowListener
 from sommelier.events import EventConsumer, EventProducer
-from sommelier.logging import pretty
 from sommelier.utils import JsonRetriever
 
 
@@ -47,7 +47,10 @@ def validate_events_for_topic(context_manager, event_registry, expected_events, 
         context_manager.set('url', topic)
         context_manager.judge().expectation(
             is_expected == match,
-            f"{error_message} event '{pretty(context_manager, expected_event['payload'])}'",
+            StringFormatter('%%! event %%pretty!', [
+                error_message,
+                expected_event['payload']
+            ]),
             cross_out_ignored_fields(context_manager, given_events, ignored_keys)
         )
 
@@ -143,6 +146,11 @@ class EventManager(FlowListener):
         received_num_messages = len(events)
         self.ctx_m().judge().expectation(
             received_num_messages == num_messages,
-            f"Expected to skip {num_messages} while got {received_num_messages} events '{pretty(self.ctx_m(), events)}'",
+            StringFormatter(
+                "Expected to skip %%! while got %%! events %%pretty!", [
+                    num_messages,
+                    received_num_messages,
+                    events,
+                ]),
             api_enhancements=False
         )
