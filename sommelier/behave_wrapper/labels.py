@@ -1,6 +1,3 @@
-from typing import Optional
-
-from sommelier.behave_wrapper.logging import Judge
 from sommelier.ctx_manager import FlowListener
 
 
@@ -14,9 +11,9 @@ class LabelingMachine(FlowListener):
         ], permanent={
             'aliases_permanent': 'aliases'
         }, managers={
-            'judge': Judge,
+            'judge': 'Judge',
         })
-        self.judge: Optional[Judge] = None
+        self.judge = None
 
     def create_alias(self, name, value):
         value = str(value)

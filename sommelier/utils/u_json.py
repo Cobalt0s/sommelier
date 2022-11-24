@@ -1,5 +1,5 @@
-from sommelier.behave_wrapper.logging import Judge
-from sommelier.utils import DictUtils, StringUtils
+from sommelier.utils.u_dict import DictUtils
+from sommelier.utils.u_string import StringUtils
 
 
 def correct_key_type(key):
@@ -23,7 +23,8 @@ class JsonRetriever:
         # superficial path that records relative location to data
         self.path = path
         self.root = self
-        self.judge = self.context_manager.of(Judge)
+        self.judge = self.context_manager.of('Judge')
+        self.logger = self.context_manager.of('DrunkLogger')
 
     def __str__(self):
         return str(self.data)
@@ -40,9 +41,8 @@ class JsonRetriever:
                 return self.create_from_retriever(self.context_manager, self.data[key], path)
             if is_arr and array_index <= len(self.data) - 1:
                 return self.create_from_retriever(self.context_manager, self.data[array_index], path)
-
         if strict:
-            self.context_manager.log_error(f'{path} key is missing in json response', self.root.data)
+            self.logger.error(f'{path} key is missing in json response', self.root.data)
         else:
             return None
 
@@ -51,7 +51,7 @@ class JsonRetriever:
             try:
                 return int(StringUtils.extract_array(key))
             except Exception:
-                self.context_manager.log_fatal(f'invalid array key {key}')
+                self.logger.fatal(f'invalid array key {key}')
         return None
 
     def create_from_retriever(self, context_manager, data, path):
@@ -120,12 +120,12 @@ class JsonRetriever:
                     del self.data[target]
                 else:
                     if strict:
-                        self.context_manager.log_error(f'{zoom} key is neither dict nor array', self.root.data)
+                        self.logger.error(f'{zoom} key is neither dict nor array', self.root.data)
                     else:
                         pass
             else:
                 if strict:
-                    self.context_manager.log_error(f'{zoom} key is neither dict nor array', self.root.data)
+                    self.logger.error(f'{zoom} key is neither dict nor array', self.root.data)
             return
 
         remove_path = ".".join(keys[:-1])

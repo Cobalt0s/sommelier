@@ -1,4 +1,3 @@
-from sommelier.behave_wrapper.logging import DrunkLogger, Judge
 from sommelier.utils import StringUtils
 
 
@@ -15,6 +14,7 @@ class ContextManager(object):
         self.master = self.context.master
         self.declare("__managers__")
 
+    # attach some data to context, particular class can manage a subset of such values
     def set(self, key, value):
         zoom = StringUtils.dot_separated_to_list(key)
         data = self.master
@@ -23,7 +23,8 @@ class ContextManager(object):
                 data = data[zoom[i]]
             data[zoom[-1]] = value
         except Exception:
-            self.log_fatal(f"couldn't find {key} in ctx manager")
+            logger = self.of('DrunkLogger')
+            logger.fatal(f"couldn't find {key} in ctx manager")
 
     def get(self, key):
         zoom = StringUtils.dot_separated_to_list(key)
@@ -33,8 +34,10 @@ class ContextManager(object):
                 data = data[z]
             return data
         except Exception:
-            self.log_fatal(f"couldn't find {key} in ctx manager")
+            logger = self.of('DrunkLogger')
+            logger.fatal(f"couldn't find {key} in ctx manager")
 
+    # sometimes values just should exist, doesn't override value if present
     def declare(self, key, value=None):
         if value is None:
             value = {}
@@ -49,19 +52,22 @@ class ContextManager(object):
         except Exception:
             return False
 
-    def log_error(self, text, extra_details=None):
-        self.of(DrunkLogger).error(text, extra_details)
-
-    def log_fatal(self, text):
-        self.of(DrunkLogger).fatal(text)
-
+    # manager gets assigned to manage a subset of variables on context
+    # it is good to store all managers as singletons to reach for their methods
     def attach_manager(self, manager):
         obj_name = manager.__class__.__name__
         if self.exists(f"__managers__.{obj_name}"):
-            self.log_fatal(
+            logger = self.of('DrunkLogger')
+            logger.fatal(
                 f'manager with name {obj_name} is already instantiated, manager instances can be only singletons')
         self.set(f"__managers__.{obj_name}", manager)
 
+    # retrieve the bean of a manager
     def of(self, clazz):
-        obj_name = clazz.__name__
+        if isinstance(clazz, str):
+            # allow arbitrary strings fo custom calls
+            # this also "resolves" any circular dependencies in class imports, cheating in python style 🤷
+            obj_name = clazz
+        else:
+            obj_name = clazz.__name__
         return self.get(f"__managers__.{obj_name}")

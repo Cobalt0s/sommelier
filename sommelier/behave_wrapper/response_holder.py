@@ -1,9 +1,8 @@
 from typing import Optional
 
-from sommelier.behave_wrapper import LabelingMachine
-from sommelier.behave_wrapper.logging import DrunkLogger, Judge
-from sommelier.ctx_manager import FlowListener
 from sommelier.utils import JsonRetriever
+from sommelier.behave_wrapper import LabelingMachine
+from sommelier.ctx_manager import FlowListener
 
 
 class ResponseJsonHolder(FlowListener):
@@ -12,12 +11,12 @@ class ResponseJsonHolder(FlowListener):
         super().__init__(definitions=[
             ['result', None]
         ], managers={
-            'logger': DrunkLogger,
-            'judge': Judge,
+            'logger': 'DrunkLogger',
+            'judge': 'Judge',
             'labeling_machine': LabelingMachine,
         })
-        self.logger: Optional[DrunkLogger] = None
-        self.judge: Optional[Judge] = None
+        self.logger = None
+        self.judge = None
         self.labeling_machine: Optional[LabelingMachine] = None
 
     def __response_result(self):
