@@ -1,6 +1,6 @@
 from sommelier.behave_wrapper import LabelingMachine, ResponseJsonHolder
 
-from sommelier.behave_wrapper.logging import StringFormatter
+from sommelier.behave_wrapper.logging import StringFormatter, Judge
 
 
 def context_contains(context_manager, first_key, second_key, value):
@@ -31,7 +31,7 @@ def _list_search(context_manager, item_list, key, value, expected_to_find=True):
 
     found_text = 'should be present' if expected_to_find else 'should be missing'
 
-    context_manager.judge().expectation(
+    context_manager.of(Judge).expectation(
         found == expected_to_find,
         StringFormatter(f"Entry ['%%!': '%%alias!'] %%!", [
             key,

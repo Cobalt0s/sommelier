@@ -5,6 +5,7 @@ from sommelier.utils import StringUtils
 # TODO all managers should register, rely on the context wrapper
 # behave provides context variable which we operate on
 # ideally all possible context interactions should be listed in here
+# TODO requests_verb, url should be in ResponseJsonHolder
 class ContextManager(object):
 
     def __init__(self, context):
@@ -47,9 +48,6 @@ class ContextManager(object):
             return True
         except Exception:
             return False
-
-    def judge(self):
-        return self.of(Judge)
 
     def log_error(self, text, extra_details=None):
         self.of(DrunkLogger).error(text, extra_details)

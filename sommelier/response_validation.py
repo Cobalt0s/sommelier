@@ -2,6 +2,7 @@ from typing import Optional
 
 from sommelier.assertions import ResponseListChecker, AssertionMethodProvider, AssertionMethod
 from sommelier.behave_wrapper import ResponseJsonHolder
+from sommelier.behave_wrapper.logging import Judge
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.ctx_manager import FlowListener
 from sommelier.utils import HttpStatusCodeUtils
@@ -13,18 +14,20 @@ class ResponseValidator(FlowListener):
         super().__init__(managers={
             'carpenter': Carpenter,
             'response': ResponseJsonHolder,
+            'judge': Judge,
         })
         self.carpenter: Optional[Carpenter] = None
         self.response: Optional[ResponseJsonHolder] = None
+        self.judge: Optional[Judge] = None
 
     def get_list(self, key):
         return ResponseListChecker(self.ctx_m(), key)
 
     def assert_status(self, status):
         status_code = HttpStatusCodeUtils.name_to_code(status)
-        self.ctx_m().judge().assumption(status_code is not None,
+        self.judge.assumption(status_code is not None,
                                         f'status code {status.upper()} is not supported')
-        self.ctx_m().judge().expectation(
+        self.judge.expectation(
             status_code == self.response.status(),
             f"Expected {status_code} given {self.response.status()}"
         )
@@ -40,17 +43,17 @@ class ResponseValidator(FlowListener):
             for key in expected_details:
                 x = expected_details[key]
                 y = failure_details.get(key)
-                self.ctx_m().judge().expectation(
+                self.judge.expectation(
                     x == y.raw(),
                     f"Expected `{x}` actual `{y}` for error.details.{key}"
                 )
         else:
             # We have a single value in detail
-            self.ctx_m().judge().expectation(
+            self.judge.expectation(
                 code == failure_code,
                 f"Expected error code '{code}' actual '{failure_code}'",
             )
-            self.ctx_m().judge().expectation(
+            self.judge.expectation(
                 details == failure_details,
                 f"Expected `{details}` actual `{failure_details}` for error.details"
             )
@@ -81,7 +84,7 @@ class ResponseValidator(FlowListener):
         for k in expected_keys:
             if not j.has(k):
                 missing_keys.append(k)
-        self.ctx_m().judge().assumption(
+        self.judge.assumption(
             len(missing_keys) == 0,
             f"Response doesn't include keys: {missing_keys}"
         )
@@ -104,7 +107,7 @@ class ResponseValidator(FlowListener):
         json = self.response.body()
         elements = json.get(zoom).raw_array()
         size = len(elements)
-        self.ctx_m().judge().expectation(
+        self.judge.expectation(
             amount == size,
             f"Expected {amount} elements on page, given {size}"
         )

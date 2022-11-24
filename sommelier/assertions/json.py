@@ -1,6 +1,6 @@
 from enum import Enum
 
-from sommelier.behave_wrapper.logging import StringFormatter
+from sommelier.behave_wrapper.logging import StringFormatter, Judge
 from sommelier.behave_wrapper.tables import Carpenter
 
 
@@ -14,7 +14,7 @@ def assert_json_properties_in_object(context_manager, json):
     for zoom, expected_value in context_manager.of(Carpenter).builder().double().rows():
         given_value = str(json.get(zoom).raw())
 
-        context_manager.judge().expectation(
+        context_manager.of(Judge).expectation(
             expected_value == given_value,
             StringFormatter('Expected %%alias! given %%alias! for key %%!', [
                 expected_value,
@@ -32,7 +32,7 @@ def _assert_json_properties_in_list(context_manager, json, contains):
             given_value = v.get(zoom).raw_str()
             assertion_flag = operation(assertion_flag, (expected_value == given_value))
 
-        context_manager.judge().expectation(
+        context_manager.of(Judge).expectation(
             assertion_flag,
             StringFormatter('Expected %%alias! was not found inside %%!', [
                 expected_value,

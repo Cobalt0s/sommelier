@@ -2,6 +2,7 @@ from behave import given, then
 
 from features import apiMockManager
 
+from sommelier.behave_wrapper.logging import Judge
 from sommelier.utils import StringUtils
 
 
@@ -9,7 +10,7 @@ from sommelier.utils import StringUtils
 def associate_svcs_ports(context, services, ports):
     svc_list = StringUtils.comma_separated_to_list(services)
     port_list = StringUtils.comma_separated_to_list(ports)
-    context.ctx_manager.judge().assumption(len(svc_list) == len(port_list), "service names do not match ports")
+    context.ctx_manager.of(Judge).assumption(len(svc_list) == len(port_list), "service names do not match ports")
 
     apiMockManager.define_svc_ports(svc_list, port_list)
 
@@ -22,7 +23,7 @@ def define_svc_mock(context, svc, rest_call, status):
 @given('Define {svc} mock aliased with {alias} on {rest_call} with status {status}')
 def define_svc_mock_with_alias(context, svc, alias, rest_call, status):
     rest_call_split = StringUtils.space_separated_to_list(rest_call)
-    context.ctx_manager.judge().assumption(
+    context.ctx_manager.of(Judge).assumption(
         len(rest_call_split) == 2, "rest call must have space between operation and url 'GET /cats/1'"
     )
     operation = rest_call_split[0]

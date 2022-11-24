@@ -3,6 +3,7 @@ from typing import Optional
 from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
 from sommelier.behave_wrapper import ResponseJsonHolder
+from sommelier.behave_wrapper.logging import Judge
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.ctx_manager import FlowListener
 
@@ -19,9 +20,11 @@ class APIMockManager(FlowListener):
         ], managers={
             'carpenter': Carpenter,
             'response': ResponseJsonHolder,
+            'judge': Judge,
         })
         self.carpenter: Optional[Carpenter] = None
         self.response: Optional[ResponseJsonHolder] = None
+        self.judge: Optional[Judge] = None
         require_var(host, "host")
         require_var(port, "port")
         self.client = SimpleApiClient(host, port)
@@ -87,10 +90,10 @@ class APIMockManager(FlowListener):
     def is_satisfied(self):
         self.client.get('/mocks/services/unsatisfied')
         data = self.response.body().get("data")
-        self.ctx_m().judge().expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
+        self.judge.expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
 
     def remove_svc(self, svc):
-        self.ctx_m().judge().expectation(
+        self.judge.expectation(
             svc in self.ctx_m().get('rest_mock.services'), f"cannot remove mocks from unknown service '{svc}'"
         )
         self.client.delete(f'/mocks/services/{svc}')
@@ -104,12 +107,12 @@ class APIMockManager(FlowListener):
         self.client.delete(f'/mocks/services/{mock["svc"]}/endpoints/{mock["id"]}')
 
     def _has_current_mock(self):
-        self.ctx_m().judge().assumption(
+        self.judge.assumption(
             'svc' in self.ctx_m().get('rest_mock.current'), "no current mock definition exists"
         )
 
     def _has_mock_definition(self, alias):
-        self.ctx_m().judge().expectation(
+        self.judge.expectation(
             alias in self.ctx_m().get('rest_mock.definitions'), f"mock with name '{alias}' is not defined"
         )
 

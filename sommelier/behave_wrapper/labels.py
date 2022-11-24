@@ -1,3 +1,6 @@
+from typing import Optional
+
+from sommelier.behave_wrapper.logging import Judge
 from sommelier.ctx_manager import FlowListener
 
 
@@ -10,7 +13,10 @@ class LabelingMachine(FlowListener):
             ['aliases', {}],
         ], permanent={
             'aliases_permanent': 'aliases'
+        }, managers={
+            'judge': Judge,
         })
+        self.judge: Optional[Judge] = None
 
     def create_alias(self, name, value):
         value = str(value)
@@ -30,7 +36,7 @@ class LabelingMachine(FlowListener):
         if identifier is not None:
             return identifier
         # if Cucumber test is written correctly alias/variable should've existed
-        self.ctx_m().judge().assumption(
+        self.judge.assumption(
             False,
             f'Alias "{name}" is not found since no id is associated with it',
         )

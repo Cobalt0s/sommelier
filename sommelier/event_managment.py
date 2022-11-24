@@ -1,6 +1,7 @@
 import copy
 from typing import Optional
 
+from sommelier.behave_wrapper.logging import Judge
 from sommelier.behave_wrapper.logging.format_str import StringFormatter
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.ctx_manager import FlowListener
@@ -45,7 +46,7 @@ def validate_events_for_topic(context_manager, event_registry, expected_events, 
         error_message = 'Expected' if is_expected else 'Not expected but present'
         context_manager.set('requests_verb', 'CONSUME')
         context_manager.set('url', topic)
-        context_manager.judge().expectation(
+        context_manager.of(Judge).expectation(
             is_expected == match,
             StringFormatter('%%! event %%pretty!', [
                 error_message,
@@ -81,8 +82,10 @@ class EventManager(FlowListener):
             ['topics', {}],
         ], managers={
             'carpenter': Carpenter,
+            'judge': Judge,
         })
         self.carpenter: Optional[Carpenter] = None
+        self.judge: Optional[Judge] = None
         self.event_consumer = EventConsumer(host)
         self.event_producer = EventProducer(host)
         self.wait_timeout = wait_timeout
@@ -144,7 +147,7 @@ class EventManager(FlowListener):
         num_messages = int(num_messages)
         events = self.event_consumer.consume(topic, num_messages, None)
         received_num_messages = len(events)
-        self.ctx_m().judge().expectation(
+        self.judge.expectation(
             received_num_messages == num_messages,
             StringFormatter(
                 "Expected to skip %%! while got %%! events %%pretty!", [

@@ -1,3 +1,4 @@
+from sommelier.behave_wrapper.logging import Judge
 from sommelier.utils import DictUtils, StringUtils
 
 
@@ -22,6 +23,7 @@ class JsonRetriever:
         # superficial path that records relative location to data
         self.path = path
         self.root = self
+        self.judge = self.context_manager.of(Judge)
 
     def __str__(self):
         return str(self.data)
@@ -138,7 +140,7 @@ class JsonRetriever:
             return None
         if self.is_array():
             return self.data
-        self.context_manager.judge().expectation(
+        self.judge.expectation(
             False,
             f'value of {self.path} in json response is not an array'
         )
@@ -150,7 +152,7 @@ class JsonRetriever:
                 or isinstance(self.data, int) \
                 or isinstance(self.data, bool):
             return str(self.data)
-        self.context_manager.judge().expectation(
+        self.judge.expectation(
             False,
             f'value of {self.path} in json response is not string'
         )

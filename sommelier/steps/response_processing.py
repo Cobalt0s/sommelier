@@ -56,12 +56,12 @@ def count_elements_on_page(context, zoom, amount):
 
 @when('Save id as {item_id}')
 def save_item_id(context, item_id):
-    identifier_registry.create_alias_from_response(item_id, 'id')
+    context.ctx_manager.of(ResponseJsonHolder).save_value_as('id', item_id)
 
 
 @when('Save id located in {key} as {item_id}')
 def save_item_id_with_zoom(context, key, item_id):
-    identifier_registry.create_alias_from_response(item_id, key)
+    context.ctx_manager.of(ResponseJsonHolder).save_value_as(key, item_id)
 
 
 @given('Define uuid for list {definitions}')
