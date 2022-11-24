@@ -1,35 +1,37 @@
-from sommelier.utils import StringUtils
+from sommelier.ctx_manager import FlowListener
 
 
-class LabelingMachine(object):
+class LabelingMachine(FlowListener):
 
-    def __init__(self, context_manager) -> None:
-        self.context_manager = context_manager
-        context_manager.attach_manager(self)
-        context_manager.declare('mode_permanent_aliases', False)
-        context_manager.declare('aliases_permanent')
-        context_manager.declare('aliases')
+    def __init__(self) -> None:
+        super().__init__(definitions=[
+            ['mode_permanent_aliases', False],
+            ['aliases_permanent', {}],
+            ['aliases', {}],
+        ], permanent={
+            'aliases_permanent': 'aliases'
+        })
 
     def create_alias(self, name, value):
         value = str(value)
-        self.context_manager.set(f'aliases.{name}', value)
+        self.ctx_m().set(f'aliases.{name}', value)
         if self.__is_permanent_mode():
             # This alias should be persisted for the whole test execution and should not be reset
-            self.context_manager.set(f'aliases_permanent.{name}', value)
-            self.context_manager.log_info(f"ID[{name}] with Value[{value}]")
+            self.ctx_m().set(f'aliases_permanent.{name}', value)
+            self.ctx_m().log_info(f"ID[{name}] with Value[{value}]")
 
     def __is_permanent_mode(self) -> bool:
-        return self.context_manager.get('mode_permanent_aliases')
+        return self.ctx_m().get('mode_permanent_aliases')
 
     def toggle_permanent_mode(self, mode_status):
-        self.context_manager.set('mode_permanent_aliases', mode_status)
+        self.ctx_m().set('mode_permanent_aliases', mode_status)
 
     def find(self, name):
-        identifier = self.context_manager.get(f'aliases.{name}')
+        identifier = self.ctx_m().get(f'aliases.{name}')
         if identifier is not None:
             return identifier
         # if Cucumber test is written correctly alias/variable should've existed
-        self.context_manager.judge().assumption(
+        self.ctx_m().judge().assumption(
             False,
             f'Alias "{name}" is not found since no id is associated with it',
         )
@@ -41,7 +43,7 @@ class LabelingMachine(object):
         return result
 
     def alias_of(self, value):
-        aliases = self.context_manager.get('aliases')
+        aliases = self.ctx_m().get('aliases')
         for k, v in aliases.items():
             if v == value:
                 return k

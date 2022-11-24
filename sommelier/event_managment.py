@@ -1,9 +1,10 @@
 import copy
+from typing import Optional
 
 from sommelier.behave_wrapper.tables import Carpenter
-from sommelier.logging import pretty
-
+from sommelier.ctx_manager import FlowListener
 from sommelier.events import EventConsumer, EventProducer
+from sommelier.logging import pretty
 from sommelier.utils import JsonRetriever
 
 
@@ -68,40 +69,37 @@ def save_event_attaching_test_name(context_manager, event_alias_name, event):
         context_manager.set(f'named_events.{event_alias_name}', event)
 
 
-class EventManager:
+class EventManager(FlowListener):
 
     def __init__(self, host, wait_timeout):
-        self.context_manager = None
+        super().__init__(definitions=[
+            ['events', {}],
+            ['named_events', {}],
+            ['topics', {}],
+        ], managers={
+            'carpenter': Carpenter,
+        })
+        self.carpenter: Optional[Carpenter] = None
         self.event_consumer = EventConsumer(host)
         self.event_producer = EventProducer(host)
         self.wait_timeout = wait_timeout
-        self.carpenter = None
-
-    def set_ctx_manager(self, context_manager):
-        self.context_manager = context_manager
-        self.carpenter = self.context_manager.of(Carpenter)
-
-    def reset(self):
-        self.context_manager.set('events', {})
-        self.context_manager.set('named_events', {})
-        self.context_manager.set('topics', {})
 
     def _save_expected_event(self, topic_name, is_expected, payload, name=None):
         arr = []
-        if topic_name in self.context_manager.get('events'):
-            arr = self.context_manager.get(f'events.{topic_name}')
+        if topic_name in self.ctx_m().get('events'):
+            arr = self.ctx_m().get(f'events.{topic_name}')
         else:
-            self.context_manager.set(f'events.{topic_name}', arr)
+            self.ctx_m().set(f'events.{topic_name}', arr)
         arr.append({
             'is_expected': is_expected,
             'payload': payload,
             'name': name,
         })
-        if topic_name in self.context_manager.get('topics'):
-            topic_counter = self.context_manager.get(f'topics.{topic_name}')
-            self.context_manager.set(f'topics.{topic_name}', topic_counter + 1)
+        if topic_name in self.ctx_m().get('topics'):
+            topic_counter = self.ctx_m().get(f'topics.{topic_name}')
+            self.ctx_m().set(f'topics.{topic_name}', topic_counter + 1)
         else:
-            self.context_manager.set(f'topics.{topic_name}', 1)
+            self.ctx_m().set(f'topics.{topic_name}', 1)
 
     def save_expected_event_with_payload(self, topic_name, topic_type, author_id, is_expected):
         self._save_expected_event(topic_name, is_expected, {
@@ -115,16 +113,16 @@ class EventManager:
 
     def _collect_events(self, drain_timeout=None):
         event_registry = {}
-        for topic, num_messages in self.context_manager.get('topics').items():
+        for topic, num_messages in self.ctx_m().get('topics').items():
             event_registry[topic] = (self.event_consumer.consume(topic, num_messages, drain_timeout))
         return event_registry
 
     def validate_expected_events(self, drain_timeout=None, ignored_keys=None):
         event_registry = self._collect_events(drain_timeout)
 
-        for topic, expected_events in self.context_manager.get('events').items():
-            validate_events_for_topic(self.context_manager, event_registry, expected_events, topic, ignored_keys)
-        self.context_manager.set('events', {})
+        for topic, expected_events in self.ctx_m().get('events').items():
+            validate_events_for_topic(self.ctx_m(), event_registry, expected_events, topic, ignored_keys)
+        self.ctx_m().set('events', {})
 
     def produce_event(self, topic):
         message = self.carpenter.builder().double().dict()
@@ -143,8 +141,8 @@ class EventManager:
         num_messages = int(num_messages)
         events = self.event_consumer.consume(topic, num_messages, None)
         received_num_messages = len(events)
-        self.context_manager.judge().expectation(
+        self.ctx_m().judge().expectation(
             received_num_messages == num_messages,
-            f"Expected to skip {num_messages} while got {received_num_messages} events '{pretty(self.context_manager, events)}'",
+            f"Expected to skip {num_messages} while got {received_num_messages} events '{pretty(self.ctx_m(), events)}'",
             api_enhancements=False
         )

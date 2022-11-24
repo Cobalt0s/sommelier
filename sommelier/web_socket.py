@@ -1,11 +1,13 @@
 from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
 from sommelier.behave_wrapper.tables import Carpenter
+from sommelier.ctx_manager import FlowListener
 
 
-class WsSocketManager:
+class WsSocketManager(FlowListener):
 
     def __init__(self, wsm_host, wsm_port, svc_host, svc_port):
+        super().__init__()
         require_var(wsm_host, "host")
         require_var(wsm_port, "port")
         require_var(svc_host, "ws_host")
@@ -13,13 +15,6 @@ class WsSocketManager:
         self.client = SimpleApiClient(wsm_host, wsm_port)
         self.svc_host = svc_host
         self.svc_port = svc_port
-        self.context_manager = None
-        self.carpenter = None
-
-    def set_ctx_manager(self, context_manager):
-        self.context_manager = context_manager
-        self.client.set_ctx_manager(context_manager)
-        self.carpenter = self.context_manager.of(Carpenter)
 
     def create_socket(self, ws_name, cookie, topics):
         self.client.post(
@@ -41,5 +36,5 @@ class WsSocketManager:
     def write_message_to_topic(self, ws_name, topic):
         self.client.post(
             f'/sockets/{ws_name}/topics/{topic}/messages',
-            json=self.carpenter.builder().double().dict()
+            json=self.ctx_m().of(Carpenter).builder().double().dict()
         )

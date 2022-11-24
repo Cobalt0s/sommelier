@@ -1,26 +1,27 @@
 from sommelier import SimpleApiClient
 from sommelier.assertions import require_var
 from sommelier.behave_wrapper.tables import Carpenter
+from sommelier.ctx_manager import FlowListener
 
 
-class APIMockManager(object):
+class APIMockManager(FlowListener):
 
     def __init__(self, host, port):
+        super().__init__(definitions=[
+            ['rest_mock', {
+                'definitions': {},
+                'services': {},
+                'current': {},
+            }],
+        ])
         require_var(host, "host")
         require_var(port, "port")
         self.client = SimpleApiClient(host, port)
-        self.context_manager = None
         self.carpenter = None
 
-    def set_ctx_manager(self, context_manager):
-        self.context_manager = context_manager
-        self.client.set_ctx_manager(context_manager)
-        self.context_manager.set("rest_mock", {
-            'definitions': {},
-            'services': {},
-            'current': {},
-        })
-        self.carpenter = self.context_manager.of(Carpenter)
+    def before_all(self):
+        super(APIMockManager, self).before_all()
+        self.carpenter = self.ctx_m().of(Carpenter)
 
     def define_svc_ports(self, services, ports):
         for i in range(len(services)):
@@ -30,7 +31,7 @@ class APIMockManager(object):
                 'id': svc,
                 'port': port
             })
-            self.context_manager.set(f'rest_mock.services{svc}', port)
+            self.ctx_m().set(f'rest_mock.services{svc}', port)
 
     def create_mock(self, alias, svc, operation, url, status):
         self.client.post(f'/mocks/services/{svc}/endpoints/form', {
@@ -39,11 +40,11 @@ class APIMockManager(object):
             'url': url,
             'statusCode': status,
         })
-        identifier = self.context_manager.get_json().get("id").raw()
+        identifier = self.ctx_m().get_json().get("id").raw()
 
         self._set_current_mock(alias, identifier, svc, operation, url)
         if alias is not None:
-            self.context_manager.set(f'rest_mock.definitions.{alias}', {
+            self.ctx_m().set(f'rest_mock.definitions.{alias}', {
                 'id': identifier,
                 'svc': svc,
                 'operation': operation,
@@ -52,12 +53,12 @@ class APIMockManager(object):
 
     def set_current(self, alias):
         self._has_mock_definition(alias)
-        mock = self.context_manager.get(f'rest_mock.definitions.{alias}')
+        mock = self.ctx_m().get(f'rest_mock.definitions.{alias}')
         self._set_current_mock(alias, mock.id, mock.svc, mock.operation, mock.url)
 
     def _update_current_mock(self, key, value):
         self._has_current_mock()
-        current = self.context_manager.get('rest_mock.current')
+        current = self.ctx_m().get('rest_mock.current')
         self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
             key: value
         })
@@ -78,16 +79,16 @@ class APIMockManager(object):
         self._update_current_mock('expectedNumCalls', amount)
 
     def end_mock_definition(self):
-        self.context_manager.set('rest_mock.current', {})
+        self.ctx_m().set('rest_mock.current', {})
 
     def is_satisfied(self):
         self.client.get('/mocks/services/unsatisfied')
-        data = self.context_manager.get_json().get("data")
-        self.context_manager.judge().expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
+        data = self.ctx_m().get_json().get("data")
+        self.ctx_m().judge().expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
 
     def remove_svc(self, svc):
-        self.context_manager.judge().expectation(
-            svc in self.context_manager.get('rest_mock.services'), f"cannot remove mocks from unknown service '{svc}'"
+        self.ctx_m().judge().expectation(
+            svc in self.ctx_m().get('rest_mock.services'), f"cannot remove mocks from unknown service '{svc}'"
         )
         self.client.delete(f'/mocks/services/{svc}')
 
@@ -96,21 +97,21 @@ class APIMockManager(object):
 
     def remove_mock(self, alias):
         self._has_mock_definition(alias)
-        mock = self.context_manager.get(f'rest_mock.definitions.{alias}')
+        mock = self.ctx_m().get(f'rest_mock.definitions.{alias}')
         self.client.delete(f'/mocks/services/{mock["svc"]}/endpoints/{mock["id"]}')
 
     def _has_current_mock(self):
-        self.context_manager.judge().assumption(
-            'svc' in self.context_manager.get('rest_mock.current'), "no current mock definition exists"
+        self.ctx_m().judge().assumption(
+            'svc' in self.ctx_m().get('rest_mock.current'), "no current mock definition exists"
         )
 
     def _has_mock_definition(self, alias):
-        self.context_manager.judge().expectation(
-            alias in self.context_manager.get('rest_mock.definitions'), f"mock with name '{alias}' is not defined"
+        self.ctx_m().judge().expectation(
+            alias in self.ctx_m().get('rest_mock.definitions'), f"mock with name '{alias}' is not defined"
         )
 
     def _set_current_mock(self, alias, identifier, svc, operation, url):
-        self.context_manager.set('rest_mock.current', {
+        self.ctx_m().set('rest_mock.current', {
             'id': identifier,
             "alias": alias,
             "svc": svc,

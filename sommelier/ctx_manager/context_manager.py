@@ -34,6 +34,13 @@ class ContextManager(object):
         except Exception:
             self.log_fatal(f"couldn't find {key} in ctx manager")
 
+    def exists(self, key):
+        try:
+            self.get(key)
+            return True
+        except Exception:
+            return False
+
     def get_json(self):
         try:
             data = self.response_result().json()
@@ -81,6 +88,9 @@ class ContextManager(object):
 
     def attach_manager(self, manager):
         obj_name = manager.__class__.__name__
+        if self.exists(f"__managers__.{obj_name}"):
+            self.log_fatal(
+                f'manager with name {obj_name} is already instantiated, manager instances can be only singletons')
         self.set(f"__managers__.{obj_name}", manager)
 
     def of(self, clazz):

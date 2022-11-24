@@ -1,18 +1,22 @@
 from sommelier.behave_wrapper.tables.builders import TableBuilder, CustomInCodeTable
+from sommelier.ctx_manager import FlowListener
 
 
-class Carpenter(object):
+class Carpenter(FlowListener):
 
-    def __init__(self, context_manager) -> None:
-        self.context_manager = context_manager
-        context_manager.attach_manager(self)
-        context_manager.declare('payload', None)
+    def __init__(self) -> None:
+        super().__init__(definitions=[
+            ['payload', None],
+        ])
 
     def builder(self) -> TableBuilder:
-        payload = self.context_manager.get('payload')
+        payload = self.ctx_m().get('payload')
         if payload is not None:
             # Clear the payload variable
             # user provided it only as a replacement of behave table via code
-            self.context_manager.set('payload', None)
-            return CustomInCodeTable(self.context_manager, payload)
-        return TableBuilder(self.context_manager)
+            self.ctx_m().set('payload', None)
+            return CustomInCodeTable(self.ctx_m(), payload)
+        return TableBuilder(self.ctx_m())
+
+    def use(self, custom_table):
+        self.ctx_m().set('payload', custom_table)
