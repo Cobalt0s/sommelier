@@ -1,27 +1,11 @@
-from sommelier.behave_wrapper import LabelingMachine
-from sommelier.behave_wrapper import BeautyPrinter, Judge, DrunkLogger
-from sommelier.behave_wrapper import ResponseJsonHolder
-from sommelier.behave_wrapper import Carpenter
+from sommelier.behave_wrapper import (
+    LabelingMachine,
+    ResponseJsonHolder,
+    Carpenter,
+    BeautyPrinter, DrunkLogger, Judge)
 
 from sommelier.managers import (
-    APIMockManager, ApiClient, SimpleApiClient,
+    ApiClient, SimpleApiClient, APIMockManager,
     ResponseValidator,
-    EventManager, WsSocketManager,
+    EventManager, WSocketManager,
     UserRegistry, PaginationNavigator)
-
-if __name__ == "__main__":
-    # APIMockManager()
-    # ApiClient()
-    # SimpleApiClient()
-    # EventManager()
-    # UserRegistry()
-    # PaginationNavigator()
-    # ResponseValidator()
-    # WsSocketManager()
-    # LabelingMachine()
-    # BeautyPrinter()
-    # Judge()
-    # DrunkLogger()
-    # ResponseJsonHolder()
-    # Carpenter()
-    print("finished")

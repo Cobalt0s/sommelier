@@ -5,8 +5,8 @@ from behave import given, then, when
 
 from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.behave_wrapper.responses import ResponseJsonHolder
+from sommelier.managers.rest_restp import AssertionMethod
 
-from sommelier.assertions import AssertionMethod
 from sommelier.utils import StringUtils
 
 

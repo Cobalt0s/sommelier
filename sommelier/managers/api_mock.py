@@ -1,11 +1,11 @@
 from typing import Optional
 
-from sommelier.assertions import require_var
 from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import Judge
 from sommelier.behave_wrapper.responses import ResponseJsonHolder
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.managers import SimpleApiClient
+from sommelier.utils import require_var
 
 
 class APIMockManager(FlowListener):

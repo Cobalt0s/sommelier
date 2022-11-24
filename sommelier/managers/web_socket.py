@@ -1,10 +1,10 @@
-from sommelier.assertions import require_var
 from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.managers import SimpleApiClient
+from sommelier.utils import require_var
 
 
-class WsSocketManager(FlowListener):
+class WSocketManager(FlowListener):
 
     def __init__(self, wsm_host, wsm_port, svc_host, svc_port):
         super().__init__()
