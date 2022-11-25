@@ -95,7 +95,7 @@ class EndpointsMockRegistry:
                 if contract.matches_request(req_headers, req_qp, req_body):
                     print(f'Called: {operation} {url}')
                     contract.num_calls += 1
-                    return contract.response, contract.status_code
+                    return contract.response_holder, contract.status_code
             print("Failed finding mock")
             print("Headers: ", req_headers)
             print("Query: ", req_qp)

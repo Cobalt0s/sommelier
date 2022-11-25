@@ -10,20 +10,17 @@ class Judge(FlowListener):
     def __init__(self) -> None:
         super().__init__(managers={
             'drunk_logger': DrunkLogger,
-            'response': ResponseJsonHolder,
+            'response_holder': ResponseJsonHolder,
         })
         self.drunk_logger: Optional[DrunkLogger] = None
-        self.response: Optional[ResponseJsonHolder] = None
+        self.response_holder: Optional[ResponseJsonHolder] = None
 
     def expectation(self, condition, message, extra_details=None, api_enhancements=True):
         if condition:
             return
         if api_enhancements:
-            self.drunk_logger.info(StringFormatter(
-                f'Request {self.ctx_m().get("requests_verb")} {self.ctx_m().get("url")}', [
-                    # TODO, this should not be in the judge!
-                ],
-            ))
+            operation, path = self.response_holder.description()
+            self.drunk_logger.info(f'Request {operation} {path}')
             extra_details = self.__init_extra_details(extra_details)
         self.drunk_logger.error(message, extra_details)
 
@@ -31,7 +28,7 @@ class Judge(FlowListener):
         if extra_details is not None:
             return extra_details
         # if no extra details where specified get them inside response holder
-        json = self.response.body(strict=False)
+        json = self.response_holder.body(strict=False)
         if json is None:
             return "No JSON"
         return json.raw()

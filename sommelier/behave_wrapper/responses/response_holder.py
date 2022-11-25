@@ -31,6 +31,13 @@ class ResponseJsonHolder(FlowListener):
 
     ##########################################################
     # getters
+
+    def description(self):
+        return(
+            self.ctx_m().get('requests_verb'),
+            self.ctx_m().get('url'),
+         )
+
     def __response_result(self):
         return self.ctx_m().get('result')
 
