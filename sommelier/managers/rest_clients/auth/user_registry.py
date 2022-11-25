@@ -22,3 +22,15 @@ class UserRegistry(FlowListener):
     def grant_user_role(self, user_alias, role):
         user_id = self.labeling_machine.find(user_alias)
         self.ctx_m().set(f'roles.{user_id}', role)
+
+    def get_user_id(self):
+        return self.ctx_m().get('user_id')
+
+    def get_user_role(self):
+        user = self.get_user_id()
+        role = '0'
+        roles = self.ctx_m().get('roles')
+        if user in roles:
+            role = roles[user]
+        return role
+

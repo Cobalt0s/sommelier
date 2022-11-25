@@ -1,5 +1,5 @@
 from sommelier import response_validator, pagination_navigator
-from sommelier.managers import identifier_registry
+from sommelier.managers.rest_clients import identifier_registry
 from features import api, event_manager
 
 

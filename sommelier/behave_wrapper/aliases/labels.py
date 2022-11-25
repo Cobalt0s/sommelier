@@ -1,6 +1,6 @@
 
 from sommelier.behave_wrapper import FlowListener
-from sommelier.behave_wrapper.logging import SimpleLogger
+from sommelier.utils import SimpleLogger
 
 
 class UnknownAlias(Exception):

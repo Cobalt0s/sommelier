@@ -21,8 +21,9 @@ class ResponseValidator(FlowListener):
         self.response: Optional[ResponseJsonHolder] = None
         self.judge: Optional[Judge] = None
 
-    def get_list(self, key):
-        return ResponseListChecker(self.ctx_m(), key)
+    @staticmethod
+    def get_list(key):
+        return ResponseListChecker(key)
 
     def assert_status(self, status):
         status_code = HttpStatusCodeUtils.name_to_code(status)
@@ -100,7 +101,7 @@ class ResponseValidator(FlowListener):
         """
         j = self.response.body()
         data = j.get(key)
-        assertion_func(self.ctx_m(), data)
+        assertion_func(data)
 
     def count_data(self, zoom, amount):
         amount = int(amount)

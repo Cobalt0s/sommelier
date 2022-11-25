@@ -3,99 +3,77 @@ from uuid import uuid4
 
 from behave import given, then, when
 
-from sommelier.behave_wrapper.aliases import LabelingMachine
-from sommelier.behave_wrapper.responses import ResponseJsonHolder
-from sommelier.managers.rest_restp import AssertionMethod
-
+from sommelier.behave_wrapper import response_json_holder, labeling_machine
+from sommelier.managers import response_validator, AssertionMethod
 from sommelier.utils import StringUtils
+
+
+#
+#
+# Out of the Box
+#
+#
 
 
 @then('Response status is {status}')
 def check_response_status(context, status):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.assert_status(status)
 
 
 @then('Failure with code {code} and details')
 def check_response_failure_code_and_details_json(context, code):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.check_failure(code)
 
 
 @then('Failure with code {code} on {details}')
 def check_response_failure_code_and_details(context, code, details):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.check_failure(code, details)
 
 
 @then('Contains properties in response body')
 def contains_properties(context):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.contains_data()
 
 
 @then('Contains keys in response body')
 def contains_keys(context):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.contains_keys()
 
 
 @then('Contains properties inside object named {item_key}')
 def contains_properties(context, item_key):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.contains_data(item_key, AssertionMethod.IN_OBJECT)
 
 
 @then('Contains properties inside list named {item_key}')
 def contains_properties(context, item_key):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.contains_data(item_key, AssertionMethod.IN_LIST)
 
 
 @then('Does not contain properties inside list {item_key}')
 def contains_properties(context, item_key):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.contains_data(item_key, AssertionMethod.NOT_IN_LIST)
 
 
 @then('Number of {zoom} on page is {amount}')
 def count_elements_on_page(context, zoom, amount):
-    response_validator = context.ctx_manager.of('ResponseValidator')
     response_validator.count_data(zoom, amount)
 
 
 @when('Save id as {item_id}')
 def save_item_id(context, item_id):
-    context.ctx_manager.of(ResponseJsonHolder).save_value_as('id', item_id)
+    response_json_holder.save_value_as('id', item_id)
 
 
 @when('Save id located in {key} as {item_id}')
 def save_item_id_with_zoom(context, key, item_id):
-    context.ctx_manager.of(ResponseJsonHolder).save_value_as(key, item_id)
+    response_json_holder.save_value_as(key, item_id)
 
 
 @given('Define uuid for list {definitions}')
 def define_uuids(context, definitions):
     for d in StringUtils.comma_separated_to_list(definitions):
-        context.ctx_manager.of(LabelingMachine).create_alias(d, str(uuid4()))
-
-
-@when('I use next page cursor')
-def prepare_to_use_pagination(context):
-    pagination_navigator = context.ctx_manager.of('PaginationNavigator')
-    pagination_navigator.follow_next()
-
-
-@when('I clear pagination parameters')
-def clear_pagination(context):
-    pagination_navigator = context.ctx_manager.of('PaginationNavigator')
-    pagination_navigator.reset()
-
-
-@then('Next page does not exist')
-def next_page_missing(context):
-    pagination_navigator = context.ctx_manager.of('PaginationNavigator')
-    pagination_navigator.assert_no_next_page()
+        labeling_machine.create_alias(d, str(uuid4()))
 
 
 @when('After waiting for {duration} seconds')
@@ -111,7 +89,6 @@ def wait_ms(context, duration):
 
 @when('Selecting one of the objects and saving as {item_id}')
 def select_object_and_save(context, item_id):
-    m = context.ctx_manager
-    json = m.of(ResponseJsonHolder).body()
+    json = response_json_holder.body()
     identifier = json.get('data.[0].id').raw_str()
-    m.of(LabelingMachine).create_alias(item_id, identifier)
+    labeling_machine.create_alias(item_id, identifier)

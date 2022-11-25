@@ -1,4 +1,4 @@
-from sommelier.behave_wrapper.aliases import LabelingMachine
+from sommelier.behave_wrapper.aliases import labeling_machine
 from sommelier.utils import StringUtils
 
 TABLE_SPECIAL_VALUES = {
@@ -21,7 +21,7 @@ def process_json_value(context_manager, value):
         if alias == StringUtils.RANDOM_VAR:
             return StringUtils.get_random_string(10)
         # this alias is an abstraction of an actual value, need to resolve
-        return context_manager.of(LabelingMachine).find(alias)
+        return labeling_machine.find(alias)
     # value is raw, acts as tautology, value comes in and goes out
     return value
 

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Optional
 
 import requests
@@ -6,33 +7,32 @@ from sommelier import ResponseJsonHolder
 from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.behave_wrapper.tables import Carpenter
+from sommelier.managers.rest_clients.auth.user_registry import UserRegistry
 from sommelier.utils import UrlUtils
 
 
-class ApiClient(FlowListener):
+class AuthApiClient(FlowListener):
 
     def __init__(self, host_url):
         super().__init__(managers={
             'carpenter': Carpenter,
             'labeling_machine': LabelingMachine,
             'response_holder': ResponseJsonHolder,
+            'user_registry': UserRegistry,
         })
         self.carpenter: Optional[Carpenter] = None
         self.labeling_machine: Optional[LabelingMachine] = None
         self.response_holder: Optional[ResponseJsonHolder] = None
+        self.user_registry: Optional[UserRegistry] = None
         self.host_url = f'http://{host_url}'
 
     ##########################################################
     # common methods all operations rely on
+    @abstractmethod
     def get_headers(self):
-        user_id = self.ctx_m().get('user_id')
-        role = '0'
-        roles = self.ctx_m().get('roles')
-        if user_id in roles:
-            role = roles[user_id]
         return {
-            'User-Id': user_id,
-            'Role': role
+            'User-Id': self.user_registry.get_user_id(),
+            'Role': self.user_registry.get_user_role(),
         }
 
     def create_url(self, identifiers, url):

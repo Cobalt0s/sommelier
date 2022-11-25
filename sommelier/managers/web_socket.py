@@ -1,5 +1,5 @@
 from sommelier.behave_wrapper import FlowListener
-from sommelier.behave_wrapper.tables import Carpenter
+from sommelier.behave_wrapper.tables import carpenter
 from sommelier.managers import SimpleApiClient
 from sommelier.utils import require_var
 
@@ -36,5 +36,5 @@ class WSocketManager(FlowListener):
     def write_message_to_topic(self, ws_name, topic):
         self.client.post(
             f'/sockets/{ws_name}/topics/{topic}/messages',
-            json=self.ctx_m().of(Carpenter).builder().double().dict()
+            json=carpenter.builder().double().dict()
         )

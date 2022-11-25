@@ -1,25 +1,25 @@
-from sommelier.behave_wrapper.aliases import LabelingMachine
-from sommelier.behave_wrapper.logging import StringFormatter, Judge
-from sommelier.behave_wrapper.responses import ResponseJsonHolder
+
+from sommelier.behave_wrapper import response_json_holder, judge, labeling_machine
+from sommelier.behave_wrapper.logging import StringFormatter
 
 
-def context_contains(context_manager, first_key, second_key, value):
-    data = context_manager.of(ResponseJsonHolder).body()
+def context_contains(first_key, second_key, value):
+    data = response_json_holder.body()
     if data.has(first_key):
-        _list_search(context_manager, data.get(first_key).raw_array(), second_key, value, expected_to_find=True)
+        _list_search(data.get(first_key).raw_array(), second_key, value, expected_to_find=True)
     else:
         assert True
 
 
-def context_missing(context_manager, first_key, second_key, value):
-    data = context_manager.of(ResponseJsonHolder).body()
+def context_missing(first_key, second_key, value):
+    data = response_json_holder.body()
     if data.has(first_key):
-        _list_search(context_manager, data.get(first_key).raw_array(), second_key, value, expected_to_find=False)
+        _list_search(data.get(first_key).raw_array(), second_key, value, expected_to_find=False)
     else:
         assert True
 
 
-def _list_search(context_manager, item_list, key, value, expected_to_find=True):
+def _list_search(item_list, key, value, expected_to_find=True):
     assert item_list is not None and item_list is not []
 
     found = False
@@ -31,7 +31,7 @@ def _list_search(context_manager, item_list, key, value, expected_to_find=True):
 
     found_text = 'should be present' if expected_to_find else 'should be missing'
 
-    context_manager.of(Judge).expectation(
+    judge.expectation(
         found == expected_to_find,
         StringFormatter(f"Entry ['%%!': '%%alias!'] %%!", [
             key,
@@ -43,19 +43,17 @@ def _list_search(context_manager, item_list, key, value, expected_to_find=True):
 
 class ResponseListChecker(object):
 
-    def __init__(self, context_manager, nested_key):
-        self.context_manager = context_manager
+    def __init__(self, nested_key):
         self.nested_key = nested_key
-        self.labeling_machine = self.context_manager.of(LabelingMachine)
 
     def contains(self, k, v):
-        context_contains(self.context_manager, self.nested_key, k, v)
+        context_contains(self.nested_key, k, v)
 
     def missing(self, k, v):
-        context_missing(self.context_manager, self.nested_key, k, v)
+        context_missing(self.nested_key, k, v)
 
     def contains_id(self, identifier):
-        self.contains('id', self.labeling_machine.find(identifier))
+        self.contains('id', labeling_machine.find(identifier))
 
     def missing_id(self, identifier):
-        self.missing('id', self.labeling_machine.find(identifier))
+        self.missing('id', labeling_machine.find(identifier))
