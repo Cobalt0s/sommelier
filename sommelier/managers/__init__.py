@@ -1,4 +1,5 @@
-from sommelier.managers.client import ApiClient, SimpleApiClient
+from sommelier.managers.rest_clients.client import SimpleApiClient
+from sommelier.managers.rest_clients.simple import ApiClient
 from sommelier.managers.api_mock import APIMockManager
 from sommelier.managers.event_managment import EventManager
 from sommelier.managers.identifier_registry import UserRegistry

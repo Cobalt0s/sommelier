@@ -181,7 +181,10 @@ class JsonRetriever:
         return self.data
 
     def sort(self):
-        DictUtils.sort_dict(self.data)
+        wrapped = {
+            "_": self.data,
+        }
+        DictUtils.sort_dict(wrapped)
 
     def equals(self, other) -> bool:
         self.sort()

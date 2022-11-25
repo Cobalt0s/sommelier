@@ -4,7 +4,7 @@ from http import HTTPStatus
 # Creates a constant mapping of Friendly HTTP messages to status codes
 HTTP_STATUS_CODES = {}
 for s in HTTPStatus:
-    HTTP_STATUS_CODES[s.phrase] = s.value
+    HTTP_STATUS_CODES[s.phrase.upper()] = s.value
 
 
 class HttpStatusCodeUtils:

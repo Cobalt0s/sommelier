@@ -1,6 +1,12 @@
 from sommelier.behave_wrapper import FlowListener
 
 
+class UnknownAlias(Exception):
+
+    def __init__(self, name) -> None:
+        super().__init__(f'Alias "{name}" is not found since no id is associated with it')
+
+
 class LabelingMachine(FlowListener):
 
     def __init__(self) -> None:
@@ -10,10 +16,7 @@ class LabelingMachine(FlowListener):
             ['aliases', {}],
         ], permanent={
             'aliases_permanent': 'aliases'
-        }, managers={
-            'judge': 'Judge',
         })
-        self.judge = None
 
     def create_alias(self, name, value):
         value = str(value)
@@ -32,11 +35,7 @@ class LabelingMachine(FlowListener):
         identifier = self.ctx_m().get(f'aliases.{name}')
         if identifier is not None:
             return identifier
-        # if Cucumber test is written correctly alias/variable should've existed
-        self.judge.assumption(
-            False,
-            f'Alias "{name}" is not found since no id is associated with it',
-        )
+        raise UnknownAlias(name)
 
     def find_many(self, names: list) -> list:
         result = []

@@ -36,7 +36,7 @@ class FlowListener(object):
         return global_context_provider.get_manager()
 
     def before_all(self):
-        for name, default_val in self.__variable_definitions:
+        for name, default_val in self._instantiate_default_vars():
             self.ctx_m().declare(name, default_val)
         context_manager = global_context_provider.get_manager()
         for name, manager_clazz in self.__manager_dependencies.items():
@@ -44,7 +44,7 @@ class FlowListener(object):
             setattr(self, name, manager)
 
     def before_scenario(self):
-        for name, default_val in self.__variable_definitions:
+        for name, default_val in self._instantiate_default_vars():
             if name not in self.__permanent_variable_definitions:
                 # omit resetting permanent variables
                 self.ctx_m().set(name, default_val)
@@ -54,6 +54,15 @@ class FlowListener(object):
             values = copy.deepcopy(self.ctx_m().get(permanent_name))
             # prepopulate with permanent fields
             self.ctx_m().set(name, values)
+
+    def _instantiate_default_vars(self):
+        # create a deep copy as we don't want to pass pointer and hence mess up default values
+        # this ensures that default variable definitions are IMMUTABLE, they serve as Template
+        instantiated = []
+        # lists of 2d lists is unpacked
+        for name, v in self.__variable_definitions:
+            instantiated.append((name, copy.deepcopy(v)))
+        return instantiated
 
 
 class FlowController(object):

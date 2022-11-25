@@ -11,8 +11,8 @@ class DictUtils:
             return False
 
     @staticmethod
-    def sort_dict(obj):
-        for k, v in obj.values():
+    def sort_dict(obj: dict):
+        for k, v in obj.items():
             if isinstance(v, dict):
                 DictUtils.sort_dict(v)
             if isinstance(v, list):

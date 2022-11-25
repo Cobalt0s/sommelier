@@ -2,6 +2,7 @@ from typing import Optional
 
 from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.aliases import LabelingMachine
+from sommelier.behave_wrapper.logging import DrunkLogger
 from sommelier.utils import JsonRetriever
 
 
@@ -9,16 +10,27 @@ class ResponseJsonHolder(FlowListener):
 
     def __init__(self) -> None:
         super().__init__(definitions=[
-            ['result', None]
+            ['result', None],
+            ['requests_verb', None],
+            ['url', None],
         ], managers={
-            'logger': 'DrunkLogger',
-            'judge': 'Judge',
+            'logger': DrunkLogger,
             'labeling_machine': LabelingMachine,
         })
-        self.logger = None
-        self.judge = None
+        self.logger: Optional[DrunkLogger] = None
         self.labeling_machine: Optional[LabelingMachine] = None
 
+    ##########################################################
+    # setters
+    def with_description(self, operation, path):
+        self.ctx_m().set('requests_verb', operation)
+        self.ctx_m().set('url', path)
+
+    def hold(self, response):
+        self.ctx_m().set('result', response)
+
+    ##########################################################
+    # getters
     def __response_result(self):
         return self.ctx_m().get('result')
 
@@ -31,7 +43,7 @@ class ResponseJsonHolder(FlowListener):
             if data is None:
                 raise KeyError
             if isinstance(data, dict):
-                return JsonRetriever(self, data)
+                return JsonRetriever(self.ctx_m(), data)
             self.logger.error(f'json is not an object, got: {data}')
         except Exception:
             if strict:
@@ -39,15 +51,16 @@ class ResponseJsonHolder(FlowListener):
             else:
                 return None
 
+    ##########################################################
+    # operating on response data
     def save_value_as(self, key, alias):
-        # TODO a general response manager should exist
-        # TODO identifier registry should be repurposed to UserRegistry
-        # Try to get id from the last response data
         code = self.status()
 
-        self.judge.expectation(
-            code < 300,
-            f'Response is not ok "{code}", cannot extract id',
-            )
+        # TODO use judge (for now that is circular dependency)
+        if code > 300:
+            json = self.body(strict=False)
+            if json is None:
+                return "No JSON"
+            self.logger.error(f'Response is not ok "{code}", cannot extract id', json.raw())
         value = self.body().get(key)
         self.labeling_machine.create_alias(alias, value)

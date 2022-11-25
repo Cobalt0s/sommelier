@@ -1,6 +1,25 @@
 from sommelier.utils import StringUtils
 
 
+ERROR_PREFIX = "[ 💥 ContextManager ]"
+
+
+class ContextKeyError(Exception):
+
+    def __init__(self, key) -> None:
+        super().__init__(
+            f"{ERROR_PREFIX} couldn't find {key}"
+        )
+
+
+class ImmutableManagerError(Exception):
+
+    def __init__(self, name) -> None:
+        super().__init__(
+            f'{ERROR_PREFIX} manager instances can only be singletons, {name} is already instantiated'
+        )
+
+
 class ContextManager(object):
 
     def __init__(self, context):
@@ -8,21 +27,20 @@ class ContextManager(object):
         self.context = context
         self.context.master = {}
         self.master = self.context.master
-        self.declare("__managers__")
+        self.declare("__managers__", {})
 
     # attach some data to context, particular class can manage a subset of such values
     def set(self, key, value):
         zoom = StringUtils.dot_separated_to_list(key)
         data = self.master
         try:
-            for i in range(len(zoom)-1):
+            for i in range(len(zoom) - 1):
                 data = data[zoom[i]]
             data[zoom[-1]] = value
         except Exception:
-            logger = self.of('DrunkLogger')
-            logger.fatal(f"couldn't find {key} in ctx manager")
+            raise ContextKeyError(key)
 
-    def get(self, key):
+    def get(self, key, strict=True):
         zoom = StringUtils.dot_separated_to_list(key)
         data = self.master
         try:
@@ -30,16 +48,27 @@ class ContextManager(object):
                 data = data[z]
             return data
         except Exception:
-            logger = self.of('DrunkLogger')
-            logger.fatal(f"couldn't find {key} in ctx manager")
+            if strict:
+                raise ContextKeyError(key)
+            return None
 
     # sometimes values just should exist, doesn't override value if present
-    def declare(self, key, value=None):
-        if value is None:
-            value = {}
+    def declare(self, key, value):
+        # KEY is a zoom of a Nested Dictionary
         # if value already exists we do NOT touch it
-        if key not in self.master:
-            self.master[key] = value
+        zoom = StringUtils.dot_separated_to_list(key)
+        data = self.master
+
+        for i in range(len(zoom) - 1):
+            key = zoom[i]
+            # automatically creates all the dictionaries as it walks
+            if key not in data:
+                data[key] = {}
+            data = data[key]
+        # finally we are at the last element which will hold the desired data
+        last_key = zoom[-1]
+        if last_key not in data:
+            data[last_key] = value
 
     def exists(self, key):
         try:
@@ -53,9 +82,7 @@ class ContextManager(object):
     def attach_manager(self, manager):
         obj_name = manager.__class__.__name__
         if self.exists(f"__managers__.{obj_name}"):
-            logger = self.of('DrunkLogger')
-            logger.fatal(
-                f'manager with name {obj_name} is already instantiated, manager instances can be only singletons')
+            raise ImmutableManagerError(obj_name)
         self.set(f"__managers__.{obj_name}", manager)
 
     # retrieve the bean of a manager

@@ -1,4 +1,5 @@
 import json
+from abc import abstractmethod
 from typing import Tuple
 
 from sommelier.utils import StringUtils
@@ -132,6 +133,7 @@ class TableXDimensions(object):
     def __init__(self, data) -> None:
         self.data = data
 
+    @abstractmethod
     def rows(self):
         # Can iterate over each row
         pass

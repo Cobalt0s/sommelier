@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from sommelier.behave_wrapper.tables.output import Table1D, Table2D
 from sommelier.behave_wrapper.tables.processing import table_as_2d_list
 
@@ -9,7 +11,8 @@ class TableBuilder(object):
         self.context_manager = context_manager
         self.table = context_manager.context.table
 
-    def __to_2d_list(self):
+    @abstractmethod
+    def _to_2d_list(self):
         # Behave Step doesn't include table
         if self.table is None:
             return []
@@ -20,11 +23,11 @@ class TableBuilder(object):
         return result
 
     def singular(self) -> Table1D:
-        data = table_as_2d_list(self.context_manager, self.__to_2d_list(), 0)
+        data = table_as_2d_list(self.context_manager, self._to_2d_list(), 0)
         return Table1D(data)
 
     def double(self) -> Table2D:
-        data = table_as_2d_list(self.context_manager, self.__to_2d_list())
+        data = table_as_2d_list(self.context_manager, self._to_2d_list())
         return Table2D(data)
 
 
@@ -39,5 +42,5 @@ class CustomInCodeTable(TableBuilder):
                 raise Exception("nested dictionaries are not supported in Tables")
             self.rows.append([k, v])
 
-    def __to_2d_list(self):
+    def _to_2d_list(self):
         return self.rows

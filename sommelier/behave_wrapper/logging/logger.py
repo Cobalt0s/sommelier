@@ -22,7 +22,7 @@ class DrunkLogger(FlowListener):
         print(f'[ 🍷 Error    ] {text}')
         if extra_details is not None:
             print(self.beauty_printer.resolve(
-                StringFormatter('$$pretty!', [extra_details])
+                StringFormatter('%%pretty!', [extra_details])
             ))
         assert False, "step failed"
 
@@ -35,5 +35,5 @@ class DrunkLogger(FlowListener):
     def __log_header(self):
         gherkin_feature = self.ctx_m().context.feature
         if gherkin_feature is not None:
-            gherkin_scenario = self.ctx_m().context.scenario.name
+            gherkin_scenario = self.ctx_m().context.scenario
             print(f'[ 🌍 Scenario ] {gherkin_feature.name} >> {gherkin_scenario.name}')

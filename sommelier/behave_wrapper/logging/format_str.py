@@ -21,8 +21,12 @@ class StringFormatter(object):
         # func names which are part of Regex Group are mapped to start & end indexes in text
         matches = list(zip(func_names, indexes))
 
+        num_matches = len(matches)
+        if num_matches != len(self.args):
+            raise Exception(f"{self.text} doesn't match number of args {self.args}")
+
         letters = list(self.text)
-        for m in range(len(matches)-1, -1, -1):
+        for m in range(num_matches - 1, -1, -1):
             # since we may add more characters by inserting new values in order to rely on the indexes we collected
             # we must start insertion from the end as it doesn't distort/shift characters in the left part and
             # the right hand side is considered a complete string
