@@ -8,7 +8,7 @@ from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.aliases import LabelingMachine
 from sommelier.behave_wrapper.tables import Carpenter
 from sommelier.managers.rest_clients.auth.user_registry import UserRegistry
-from sommelier.utils import UrlUtils
+from sommelier.utils import UrlUtils, require_var
 
 
 class AuthApiClient(FlowListener):
@@ -24,6 +24,7 @@ class AuthApiClient(FlowListener):
         self.labeling_machine: Optional[LabelingMachine] = None
         self.response_holder: Optional[ResponseJsonHolder] = None
         self.user_registry: Optional[UserRegistry] = None
+        require_var(host_url, "host_url")
         self.host_url = f'http://{host_url}'
 
     ##########################################################

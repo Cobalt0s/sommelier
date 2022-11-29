@@ -1,20 +1,26 @@
-import multiprocessing
+import threading
+
 from flask import Flask
+from werkzeug.serving import make_server
 
 
-class ApplicationRunner(object):
+DEFAULT_PORT = 7000
 
-    def __init__(self, identifier, port) -> None:
-        self.identifier = identifier
-        self.service = Flask(__name__)
-        self.process = multiprocessing.Process(target=self.__server_runner(port), args=())
 
-    def __server_runner(self, port):
-        self.service.run(host="localhost", port=port, debug=True)
+class ServerThread(threading.Thread):
+    # https://stackoverflow.com/questions/15562446/how-to-stop-flask-application-without-using-ctrl-c
 
-    def start_daemon(self):
-        self.process.start()
+    def __init__(self, app: Flask):
+        threading.Thread.__init__(self)
+        self.server = make_server('127.0.0.1', DEFAULT_PORT, app)
+        self.ctx = app.app_context()
+        self.ctx.push()
 
-    def stop_daemon(self):
-        print(f"Stopping service {self.identifier}")
-        self.process.terminate()
+    def run(self):
+        self.server.serve_forever()
+
+    def schedule_shutdown(self):
+        self.server.shutdown()
+
+    def schedule_start(self):
+        self.start()

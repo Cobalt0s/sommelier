@@ -1,4 +1,2 @@
-from flask import Flask
-
-app = Flask(__name__)
+from sommelier.adapters.rest_mock.registry import service_mock_registry, ServiceMockRegistry
 

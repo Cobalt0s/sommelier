@@ -4,6 +4,8 @@ import time
 
 from confluent_kafka import Consumer
 
+from sommelier.utils import SimpleLogger
+
 DRAIN_TIMEOUT = 5
 POLL_TIMEOUT = 10
 
@@ -50,13 +52,13 @@ def drain_messages_from_kafka(c, num_messages, topic, drain_timeout=None):
             messages[i] = message
             i += 1
         if time.time() > timeout:
-            print("timeout occurred")
+            SimpleLogger.info("KafkaConsumer: timeout occurred")
             break
         if rtype == "error":
-            print("kafka consumer error has occurred")
+            SimpleLogger.info("KafkaConsumer: error has occurred")
             break
         if rtype == "finished":
-            print("Finished reading kafka topic ", topic)
+            SimpleLogger.info(f"KafkaConsumer: Finished reading topic {topic}")
             break
     return messages
 

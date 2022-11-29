@@ -34,7 +34,7 @@ class UrlUtils(object):
         url_parts = full_url.split('?')
         url = url_parts[0]
         query_params = {}
-        if url_parts.length == 2:
+        if len(url_parts) == 2:
             qps = url_parts[1].split('&')
             for qp in qps:
                 kv = qp.split('=')

@@ -7,12 +7,12 @@ from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import StringFormatter, Judge
 from sommelier.behave_wrapper.responses.response_holder import ResponseJsonHolder
 from sommelier.behave_wrapper.tables import Carpenter
-from sommelier.utils import JsonRetriever
+from sommelier.utils import JsonRetriever, require_var
 
 
 class EventManager(FlowListener):
 
-    def __init__(self, host, wait_timeout, ignored_keys=None, show_ignored=True):
+    def __init__(self, kafka_host, ignored_keys=None, show_ignored=True):
         super().__init__(definitions=[
             ['events', {}],
             ['named_events', {}],
@@ -25,9 +25,9 @@ class EventManager(FlowListener):
         self.carpenter: Optional[Carpenter] = None
         self.judge: Optional[Judge] = None
         self.response_holder: Optional[ResponseJsonHolder] = None
-        self.event_consumer = EventConsumer(host)
-        self.event_producer = EventProducer(host)
-        self.wait_timeout = wait_timeout
+        require_var(kafka_host, "kafka_host")
+        self.event_consumer = EventConsumer(kafka_host)
+        self.event_producer = EventProducer(kafka_host)
         if ignored_keys is None:
             # ignore tracing information that may come with event
             ignored_keys = ['trace']

@@ -10,3 +10,4 @@ from sommelier.managers.web_socket import WSocketManager
 
 response_validator = ResponseValidator()
 pagination_navigator = PaginationNavigator()
+api_mock = APIMockManager()

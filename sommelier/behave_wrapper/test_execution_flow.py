@@ -43,6 +43,9 @@ class FlowListener(object):
             manager = context_manager.of(manager_clazz)
             setattr(self, name, manager)
 
+    def before_feature(self):
+        pass
+
     def before_scenario(self):
         for name, default_val in self._instantiate_default_vars():
             if name not in self.__permanent_variable_definitions:
@@ -54,6 +57,21 @@ class FlowListener(object):
             values = copy.deepcopy(self.ctx_m().get(permanent_name))
             # prepopulate with permanent fields
             self.ctx_m().set(name, values)
+
+    def before_step(self):
+        pass
+
+    def after_step(self):
+        pass
+
+    def after_scenario(self):
+        pass
+
+    def after_feature(self):
+        pass
+
+    def after_all(self):
+        pass
 
     def _instantiate_default_vars(self):
         # create a deep copy as we don't want to pass pointer and hence mess up default values
@@ -81,9 +99,33 @@ class FlowController(object):
             context_manager.attach_manager(listener)
             listener.before_all()
 
+    def before_feature(self):
+        for listener in self.flow_listeners:
+            listener.before_feature()
+
     def before_scenario(self):
         for listener in self.flow_listeners:
             listener.before_scenario()
+
+    def before_step(self):
+        for listener in self.flow_listeners:
+            listener.before_step()
+
+    def after_step(self):
+        for listener in self.flow_listeners:
+            listener.after_step()
+
+    def after_scenario(self):
+        for listener in self.flow_listeners:
+            listener.after_scenario()
+
+    def after_feature(self):
+        for listener in self.flow_listeners:
+            listener.after_feature()
+
+    def after_all(self):
+        for listener in self.flow_listeners:
+            listener.after_all()
 
 
 global_context_provider = ContextProvider()

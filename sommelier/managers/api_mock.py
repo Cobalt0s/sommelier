@@ -1,16 +1,15 @@
 from typing import Optional
 
+from sommelier.adapters.rest_mock import ServiceMockRegistry
 from sommelier.behave_wrapper import FlowListener
-from sommelier.behave_wrapper.logging import Judge
+from sommelier.behave_wrapper.logging import Judge, StringFormatter
 from sommelier.behave_wrapper.responses import ResponseJsonHolder
 from sommelier.behave_wrapper.tables import Carpenter
-from sommelier.managers import SimpleApiClient
-from sommelier.utils import require_var
 
 
 class APIMockManager(FlowListener):
 
-    def __init__(self, host, port):
+    def __init__(self):
         super().__init__(definitions=[
             ['rest_mock', {
                 'definitions': {},
@@ -21,106 +20,117 @@ class APIMockManager(FlowListener):
             'carpenter': Carpenter,
             'response': ResponseJsonHolder,
             'judge': Judge,
+            'registry': ServiceMockRegistry,
         })
         self.carpenter: Optional[Carpenter] = None
         self.response: Optional[ResponseJsonHolder] = None
         self.judge: Optional[Judge] = None
-        require_var(host, "host")
-        require_var(port, "port")
-        self.client = SimpleApiClient(host, port)
+        self.registry: Optional[ServiceMockRegistry] = None
 
-    def define_svc_ports(self, services, ports):
-        for i in range(len(services)):
-            svc = services[i]
-            port = ports[i]
-            self.client.post('/mocks/services/form', {
-                'id': svc,
-                'port': port
-            })
-            self.ctx_m().set(f'rest_mock.services{svc}', port)
+    ##########################################################
+    # SVC and Endpoint Constructors
 
-    def create_mock(self, alias, svc, operation, url, status):
-        self.client.post(f'/mocks/services/{svc}/endpoints/form', {
-            'id': alias,
-            'operation': operation,
-            'url': url,
-            'statusCode': status,
-        })
-        identifier = self.response.body().get("id").raw()
+    def create_mock(self, alias, operation, url, status):
+        endpoint_id = self.registry.create_endpoint(alias, operation, url, status)
+        self._set_current_mock(alias, endpoint_id, operation, url)
 
-        self._set_current_mock(alias, identifier, svc, operation, url)
-        if alias is not None:
-            self.ctx_m().set(f'rest_mock.definitions.{alias}', {
-                'id': identifier,
-                'svc': svc,
-                'operation': operation,
-                'url': url,
-            })
-
+    ##########################################################
+    # Getting Access
     def set_current(self, alias):
         self._has_mock_definition(alias)
         mock = self.ctx_m().get(f'rest_mock.definitions.{alias}')
-        self._set_current_mock(alias, mock.id, mock.svc, mock.operation, mock.url)
+        self._set_current_mock(alias, mock.id, mock.operation, mock.url)
 
-    def _update_current_mock(self, key, value):
-        self._has_current_mock()
-        current = self.ctx_m().get('rest_mock.current')
-        self.client.put(f'/mocks/services/{current["svc"]}/endpoints/{current["id"]}', json={
-            key: value
-        })
+    def __get_current_endpoint(self):
+        current = self.__get_current()
+        identifier = current["id"]
+        return self.registry.get_endpoint(identifier)
 
+    ##########################################################
+    # Endpoint updates
     def add_headers_to_current_mock(self):
-        self._update_current_mock('headers', self.carpenter.builder().double().dict())
+        endpoint = self.__get_current_endpoint()
+        endpoint.redefine_contract(
+            headers=self.carpenter.builder().double().dict(),
+        )
 
     def add_request_to_current_mock(self):
-        self._update_current_mock('request', self.carpenter.builder().double().dict())
+        endpoint = self.__get_current_endpoint()
+        endpoint.redefine_contract(
+            req=self.carpenter.builder().double().dict(),
+        )
 
     def add_response_to_current_mock(self):
-        self._update_current_mock('response', self.carpenter.builder().double().dict())
+        endpoint = self.__get_current_endpoint()
+        endpoint.redefine_contract(
+            res=self.carpenter.builder().double().dict(),
+        )
 
     def add_response_status_to_current_mock(self, status):
-        self._update_current_mock('statusCode', status)
+        endpoint = self.__get_current_endpoint()
+        endpoint.redefine_contract(
+            status_code=status,
+        )
 
     def add_num_expected_calls_to_current_mock(self, amount):
-        self._update_current_mock('expectedNumCalls', amount)
+        endpoint = self.__get_current_endpoint()
+        endpoint.redefine_contract(
+            expected_num_calls=amount,
+        )
 
+    ##########################################################
+    # Final actions
     def end_mock_definition(self):
-        self.ctx_m().set('rest_mock.current', {})
+        self._set_current_mock()
 
     def is_satisfied(self):
-        self.client.get('/mocks/services/unsatisfied')
-        data = self.response.body().get("data")
-        self.judge.expectation(len(data.retriever_array()) == 0, 'some mocks are not satisfied')
-
-    def remove_svc(self, svc):
+        unsatisfied_endpoints = self.registry.get_unsatisfied_endpoints()
         self.judge.expectation(
-            svc in self.ctx_m().get('rest_mock.services'), f"cannot remove mocks from unknown service '{svc}'"
-        )
-        self.client.delete(f'/mocks/services/{svc}')
+            len(unsatisfied_endpoints) == 0,
+            StringFormatter('some mocks are not satisfied %%pretty!', [
+                unsatisfied_endpoints
+            ]))
+
+    ##########################################################
+    # Destruction
 
     def clear_mocks(self):
-        self.client.delete(f'/mocks/services/endpoints')
+        self.registry.clear()
 
-    def remove_mock(self, alias):
-        self._has_mock_definition(alias)
-        mock = self.ctx_m().get(f'rest_mock.definitions.{alias}')
-        self.client.delete(f'/mocks/services/{mock["svc"]}/endpoints/{mock["id"]}')
+    def ignore_calls(self):
+        self.registry.ignore()
 
-    def _has_current_mock(self):
-        self.judge.assumption(
-            'svc' in self.ctx_m().get('rest_mock.current'), "no current mock definition exists"
-        )
+    ##########################################################
+    # helpers
 
     def _has_mock_definition(self, alias):
+        found = self.ctx_m().exists(f'rest_mock.definitions.{alias}')
         self.judge.expectation(
-            alias in self.ctx_m().get('rest_mock.definitions'), f"mock with name '{alias}' is not defined"
+            found, f"mock with name '{alias}' is not defined"
         )
 
-    def _set_current_mock(self, alias, identifier, svc, operation, url):
-        self.ctx_m().set('rest_mock.current', {
+    def __get_current(self):
+        current = self.ctx_m().get('rest_mock.current')
+        is_empty = len(current) == 0
+        self.judge.assumption(
+            not is_empty, "no current mock definition exists"
+        )
+        return current
+
+    def _set_current_mock(self, alias=None, identifier=None, operation=None, url=None):
+        current = {
             'id': identifier,
             "alias": alias,
-            "svc": svc,
             "operation": operation,
             "url": url,
-        })
+        }
+        if identifier is None:
+            # we want to remove!
+            current = {}
+        if alias is not None:
+            self.ctx_m().set(f'rest_mock.definitions.{alias}', {
+                'id': identifier,
+                'operation': operation,
+                'url': url,
+            })
+        self.ctx_m().set('rest_mock.current', current)

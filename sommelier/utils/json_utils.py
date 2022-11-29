@@ -2,9 +2,15 @@ from sommelier.utils.dict_utils import DictUtils
 from sommelier.utils.string_utils import StringUtils
 
 
+ARRAY_APPEND_SYMBOL = "+"
+
+
 def correct_key_type(key):
     if StringUtils.is_array(key):
-        return int(StringUtils.extract_array(key)), True  # is array
+        index = StringUtils.extract_array(key)
+        if index == ARRAY_APPEND_SYMBOL:
+            return ARRAY_APPEND_SYMBOL, True
+        return int(index), True  # is array
     return key, False
 
 
@@ -102,7 +108,7 @@ class JsonRetriever:
 
         # set the final last element
         last_key, is_arr = correct_key_type(zoom[-1])
-        if is_arr and len(data) == last_key:
+        if is_arr and len(data) == last_key or last_key == ARRAY_APPEND_SYMBOL:
             data.append(val)
         else:
             data[last_key] = val
@@ -199,6 +205,12 @@ class JsonRetriever:
 
 
 if __name__ == '__main__':
+
+    class FakeCtx:
+        def of(self, key):
+            pass
+    fake_ctx = FakeCtx()
+
     a = {
         "hello": {
             "a": [10, {
@@ -217,7 +229,7 @@ if __name__ == '__main__':
         },
         "trace": 5
     }
-    jr = JsonRetriever(None, a)
+    jr = JsonRetriever(fake_ctx, a)
     jr.delete('hello.a.[1].yo.[2]')
     print(jr.raw() == b)
 
@@ -280,4 +292,25 @@ if __name__ == '__main__':
         },
     }
     jr.set('baggage.target.[0].name', 'client')
-    print(jr.raw() == e)
+
+    f = {
+        "hello": {
+            "a": [10, 30],
+            "b": 7
+        },
+        "trace": {
+            "id": 55,
+            "source": "serviceName"
+        },
+        "baggage": {
+            "target": [{
+                "name": "client",
+            }, {
+                "name": "android",
+            }],
+        },
+    }
+    jr.set('baggage.target.[+]', {
+        "name": "android",
+    })
+    print(jr.raw() == f)

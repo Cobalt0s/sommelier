@@ -40,3 +40,7 @@ class StringFormatter(object):
             letters[index[0]:index[1]] = value
         return "".join(letters)
 
+    # TODO pretty print dictionary difference using
+    #       * dictdiffer.diff(x, y)
+    #       * special function that should compare 2 values
+    #       * special function that should compare 1 against the best match in list
