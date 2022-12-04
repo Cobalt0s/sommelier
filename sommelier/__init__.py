@@ -1,11 +1,11 @@
-from sommelier.client import ApiClient, SimpleApiClient
-from sommelier.event_managment import EventManager
-from sommelier.identifier_registry import IdentifierRegistry
-from sommelier.page_navigation import PaginationNavigator
-from sommelier.response_validation import ResponseValidator
-from sommelier.web_socket import WsSocketManager
+from sommelier.behave_wrapper import (
+    LabelingMachine,
+    ResponseJsonHolder,
+    Carpenter,
+    BeautyPrinter, DrunkLogger, Judge)
 
-identifier_registry = IdentifierRegistry()
-response_validator = ResponseValidator(identifier_registry)
-
-pagination_navigator = PaginationNavigator()
+from sommelier.managers import (
+    AuthApiClient, SimpleApiClient, APIMockManager,
+    ResponseValidator,
+    EventManager, WSocketManager,
+    UserRegistry, PaginationNavigator)
