@@ -6,6 +6,23 @@ from sommelier.behave_wrapper.logging import DrunkLogger
 from sommelier.utils import JsonRetriever
 
 
+class ResponseWrapper(object):
+
+    def __init__(self, status_code, data) -> None:
+        super().__init__()
+        self.status_code = status_code
+        self.data = data
+
+    def json(self):
+        return self.data
+
+
+class EmptyResponse(ResponseWrapper):
+
+    def __init__(self) -> None:
+        super().__init__(-1, None)
+
+
 class ResponseJsonHolder(FlowListener):
 
     def __init__(self) -> None:
@@ -39,7 +56,12 @@ class ResponseJsonHolder(FlowListener):
          )
 
     def __response_result(self):
-        return self.ctx_m().get('result')
+        res = self.ctx_m().get('result')
+        if res is None:
+            return EmptyResponse()
+        if isinstance(res, dict) or isinstance(res, list):
+            return ResponseWrapper(777, res)
+        return res
 
     def status(self):
         return self.__response_result().status_code

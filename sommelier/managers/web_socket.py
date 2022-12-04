@@ -1,40 +1,53 @@
-from sommelier.behave_wrapper import FlowListener
+import json
+from typing import Optional
+
+from sommelier.adapters.sockets import (
+    WebSocketReader, WebSocketWriter
+)
+from sommelier.behave_wrapper import FlowListener, response_json_holder
 from sommelier.behave_wrapper.tables import carpenter
-from sommelier.managers import SimpleApiClient
 from sommelier.utils import require_var
 
 
 class WSocketManager(FlowListener):
+    """
+    This is a one way web socket manager
+    Manager allows to do read, write or both but via 2 different ws
+    Tests written in behave are sequential and WS manager fits into this idea
+    """
 
-    def __init__(self, wsm_host, wsm_port, svc_host, svc_port):
+    def __init__(self, host):
         super().__init__()
-        require_var(wsm_host, "host")
-        require_var(wsm_port, "port")
-        require_var(svc_host, "ws_host")
-        require_var(svc_port, "ws_port")
-        self.client = SimpleApiClient(wsm_host, wsm_port)
-        self.svc_host = svc_host
-        self.svc_port = svc_port
+        require_var(host, "host")
+        self.host = host
+        self.reader: Optional[WebSocketReader] = None
+        self.writer: Optional[WebSocketWriter] = None
 
-    def create_socket(self, ws_name, cookie, topics):
-        self.client.post(
-            '/sockets',
-            {
-                "host": self.svc_host,
-                "port": self.svc_port,
-                "name": ws_name,
-                "cookie": cookie,
-                "topics": topics
-            }
-        )
+    def after_all(self):
+        super().after_all()
+        self.disconnect_all()
 
-    def get_message_from_topic(self, ws_name, topic):
-        self.client.get(
-            f'/sockets/{ws_name}/topics/{topic}/messages',
-        )
+    def create_socket(self, reader):
+        cookies = carpenter.builder().double().dict()
+        if reader:
+            self.reader = WebSocketReader(self.host, cookies)
+            self.reader.schedule_start()
+        else:
+            self.writer = WebSocketWriter(self.host, cookies)
+            self.writer.schedule_start()
 
-    def write_message_to_topic(self, ws_name, topic):
-        self.client.post(
-            f'/sockets/{ws_name}/topics/{topic}/messages',
-            json=carpenter.builder().double().dict()
-        )
+    def read_data(self):
+        response_json_holder.with_description("WS-Read", self.host)
+        text = self.reader.read_one()
+        data = json.loads(text)
+        response_json_holder.hold(data)
+
+    def write_data(self):
+        data = carpenter.builder().double().dict()
+        self.writer.write(data)
+
+    def disconnect_all(self):
+        if self.reader is not None:
+            self.reader.schedule_shutdown()
+        if self.writer is not None:
+            self.writer.schedule_shutdown()

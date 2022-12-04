@@ -37,7 +37,7 @@ class StringFormatter(object):
                 raise Exception(f"cannot resolve method specified in String Format [{self.text}] of %%{func_name}!")
             value = f(self.args[m])
 
-            letters[index[0]:index[1]] = value
+            letters[index[0]:index[1]] = str(value)
         return "".join(letters)
 
     # TODO pretty print dictionary difference using

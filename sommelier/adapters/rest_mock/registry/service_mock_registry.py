@@ -144,7 +144,6 @@ class ServiceMockRegistry(FlowListener):
         self.flask_app = new_flask_app(self.logger)
         self.app_runner = ServerThread(self.flask_app)
         self.app_runner.schedule_start()
-        SimpleLogger.info("Mocked service is ready for calls")
 
     def after_scenario(self):
         super(ServiceMockRegistry, self).after_scenario()

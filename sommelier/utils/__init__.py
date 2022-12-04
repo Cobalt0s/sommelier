@@ -4,6 +4,7 @@ from sommelier.utils.string_utils import StringUtils
 from sommelier.utils.http_codes_utils import HttpStatusCodeUtils
 from sommelier.utils.json_utils import JsonRetriever
 from sommelier.utils.logger import SimpleLogger
+from sommelier.utils.threading import ThreadSafeList
 
 
 def require_var(variable, name):

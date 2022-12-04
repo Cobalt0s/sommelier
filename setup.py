@@ -12,6 +12,7 @@ setup(
         'confluent-kafka==1.7.0',
         'requests>=2.28.1',
         'flask>=2.2.2',
+        'websockets>=10.4'
     ],
     url='https://github.com/Cobalt0s/sommelier',
     author='Constantin Koval',
