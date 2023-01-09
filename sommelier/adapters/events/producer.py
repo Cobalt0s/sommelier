@@ -19,9 +19,12 @@ class EventProducer:
             'bootstrap.servers': host
         })
 
-    def send_message(self, topic, message):
+    def send_message(self, topic, message, key=None):
         try:
-            self.producer.produce(topic, key="key-from-test", value=json.dumps(message).encode('ascii'), callback=delivery_callback)
+            if key is None:
+                key = "key-from-test"
+            value = json.dumps(message).encode('ascii')
+            self.producer.produce(topic, key=key, value=value, callback=delivery_callback)
 
         except BufferError:
             raise Exception(

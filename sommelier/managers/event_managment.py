@@ -84,9 +84,9 @@ class EventManager(FlowListener):
 
     ##########################################################
     # sending messages to server via Kafka
-    def produce_event(self, topic):
+    def produce_event(self, topic, key=None):
         message = self.carpenter.builder().double().dict()
-        self.event_producer.send_message(topic, message)
+        self.event_producer.send_message(topic, message, key=key)
 
     ##########################################################
     # skipping, draining events from Kafka topics
