@@ -4,6 +4,8 @@ from typing import List
 from sommelier.behave_wrapper import ContextManager
 from sommelier.behave_wrapper.provider import ContextProvider
 
+permanent_mode = False
+
 
 class FlowListener(object):
 
@@ -34,6 +36,10 @@ class FlowListener(object):
     def ctx_m() -> ContextManager:
         # every implementation should get context manager only this way
         return global_context_provider.get_manager()
+
+    @staticmethod
+    def is_permanent_mode() -> bool:
+        return permanent_mode
 
     def before_all(self):
         for name, default_val in self._instantiate_default_vars():
@@ -90,6 +96,11 @@ class FlowController(object):
 
     def register(self, listener: FlowListener):
         self.flow_listeners.append(listener)
+
+    @staticmethod
+    def toggle_permanent_mode(mode_status):
+        global permanent_mode
+        permanent_mode = mode_status
 
     def before_all(self, context):
         global_context_provider.set(context)

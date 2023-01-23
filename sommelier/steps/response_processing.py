@@ -40,6 +40,11 @@ def contains_keys(context):
     response_validator.contains_keys()
 
 
+@then('Missing keys in response body')
+def contains_keys(context):
+    response_validator.contains_keys(missing=True)
+
+
 @then('Contains properties inside object named {item_key}')
 def contains_properties(context, item_key):
     response_validator.contains_data(item_key, AssertionMethod.IN_OBJECT)

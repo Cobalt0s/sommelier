@@ -203,6 +203,16 @@ class JsonRetriever:
     def is_dict(self):
         return isinstance(self.data, dict)
 
+    def search_in_arr(self, key, value):
+        if not self.is_array():
+            return None
+        arr = self.retriever_array()
+        for i in range(len(arr)):
+            potential_candidate = arr[i].get(key, strict=False).raw()
+            if potential_candidate == value:
+                return arr[i]
+        return None
+
 
 if __name__ == '__main__':
 

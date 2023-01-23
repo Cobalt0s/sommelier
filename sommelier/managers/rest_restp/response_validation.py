@@ -79,16 +79,23 @@ class ResponseValidator(FlowListener):
                       assertion_method: AssertionMethod = AssertionMethod.IN_OBJECT):
         self._apply_assert(key, AssertionMethodProvider.of(assertion_method))
 
-    def contains_keys(self):
+    def contains_keys(self, missing=False):
         expected_keys = self.carpenter.builder().singular().list()
         j = self.response.body()
-        missing_keys = []
+        not_satisfactory_set = []
         for k in expected_keys:
-            if not j.has(k):
-                missing_keys.append(k)
+            not_found = not j.has(k)
+            search_rule = not_found == missing
+            # breaking rule means key is not satisfactory to the method
+            # exceptions to the rule are collected
+            if not search_rule:
+                not_satisfactory_set.append(k)
+        verb = "doesn't"
+        if missing:
+            verb = "does"
         self.judge.assumption(
-            len(missing_keys) == 0,
-            f"Response doesn't include keys: {missing_keys}"
+            len(not_satisfactory_set) == 0,
+            f"Response {verb} include keys: {not_satisfactory_set}"
         )
 
     def _apply_assert(self, key, assertion_func):

@@ -12,4 +12,6 @@ class HttpStatusCodeUtils:
     @staticmethod
     def name_to_code(name) -> Optional[int]:
         capitalised = name.upper()
+        if not (capitalised in HTTP_STATUS_CODES):
+            return None
         return HTTP_STATUS_CODES[capitalised]

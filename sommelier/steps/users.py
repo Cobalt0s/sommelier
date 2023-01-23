@@ -14,9 +14,11 @@ def select_user(context, user_name):
     user_registry.select_user(user_name)
 
 
-@given('Grant user {user_name} role {role}')
-def grant_role(context, user_name, role):
-    role_num = '0'
-    if role == 'admin':
-        role_num = '1'
-    user_registry.grant_user_role(user_name, role_num)
+@given('Grant user {user_name} roles {roles}')
+def grant_role(context, user_name, roles):
+    user_registry.grant_user_role(user_name, roles)
+
+
+@given('Application of {app_name}')
+def set_application_name(context, app_name):
+    user_registry.select_application(app_name)
