@@ -15,7 +15,7 @@ all_endpoints = {}
 ignore_calls = False
 
 
-def global_mock_service_hansdler(logger: DrunkLogger, path, context):
+def global_mock_service_handler(logger: DrunkLogger, path):
     if ignore_calls:
         # we don't care that we were called
         # tester indicated that these calls are to be ignored
@@ -68,13 +68,13 @@ def get_body_json():
     return body
 
 
-def new_flask_app(logger, context):
+def new_flask_app(logger):
     app = Flask(__name__)
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>', methods=["GET", "POST", "PUT", "DELETE"])
     def catch_all(path):
-        return global_mock_service_handler(logger, f"/{path}", context)
+        return global_mock_service_handler(logger, f"/{path}")
 
     return app
 
@@ -146,7 +146,7 @@ class ServiceMockRegistry(FlowListener):
 
     def before_all(self):
         super(ServiceMockRegistry, self).before_all()
-        self.flask_app = new_flask_app(self.logger, self.ctx_m().context)
+        self.flask_app = new_flask_app(self.logger)
         self.app_runner = ServerThread(self.flask_app)
         self.app_runner.schedule_start()
 
