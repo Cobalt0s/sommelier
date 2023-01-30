@@ -67,7 +67,7 @@ def send_event(context, topic):
 
 
 @when('Sending event to {topic} topic with key {key}')
-def send_event(context, topic, key):
+def send_event_with_key(context, topic, key):
     event_manager: EventManager = context.ctx_manager.of(EventManager)
     event_manager.produce_event(topic, key)
 

@@ -6,24 +6,29 @@ from sommelier import DrunkLogger
 from sommelier.adapters.rest_mock.registry.application_runner import ServerThread
 from sommelier.behave_wrapper import FlowListener
 from sommelier.behave_wrapper.logging import StringFormatter
-from sommelier.utils import UrlUtils, DictUtils, SimpleLogger, JsonRetriever
+from sommelier.utils import UrlUtils, DictUtils, JsonRetriever
 
 TEAPOT_STATUS = 418
+INTERNAL_SERVER_ERROR = 500
 
 all_endpoints = {}
 ignore_calls = False
 
 
-def global_mock_service_handler(logger: DrunkLogger, path):
+def global_mock_service_hansdler(logger: DrunkLogger, path, context):
     if ignore_calls:
         # we don't care that we were called
         # tester indicated that these calls are to be ignored
-        return
+        return {}, TEAPOT_STATUS
 
     headers = dict(request.headers)
     qp = request.args.to_dict()
     body = get_body_json()
     method = request.method.upper()
+    logger.info(StringFormatter(
+        'Method %%pretty! | Path %%pretty! | QP %%pretty! | Body %%pretty!', [
+            method, path, qp, body,
+        ]))
 
     if len(all_endpoints) == 0:
         logger.info("Mocked service was called while no expectations exist")
@@ -52,7 +57,7 @@ def global_mock_service_handler(logger: DrunkLogger, path):
             "operation": method,
         }
     }
-    return err_result, TEAPOT_STATUS
+    return err_result, INTERNAL_SERVER_ERROR
 
 
 def get_body_json():
@@ -63,13 +68,13 @@ def get_body_json():
     return body
 
 
-def new_flask_app(logger):
+def new_flask_app(logger, context):
     app = Flask(__name__)
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>', methods=["GET", "POST", "PUT", "DELETE"])
     def catch_all(path):
-        return global_mock_service_handler(logger, f"/{path}")
+        return global_mock_service_handler(logger, f"/{path}", context)
 
     return app
 
@@ -141,7 +146,7 @@ class ServiceMockRegistry(FlowListener):
 
     def before_all(self):
         super(ServiceMockRegistry, self).before_all()
-        self.flask_app = new_flask_app(self.logger)
+        self.flask_app = new_flask_app(self.logger, self.ctx_m().context)
         self.app_runner = ServerThread(self.flask_app)
         self.app_runner.schedule_start()
 
