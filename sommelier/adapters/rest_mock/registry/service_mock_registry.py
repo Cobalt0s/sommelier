@@ -25,10 +25,10 @@ def global_mock_service_handler(logger: DrunkLogger, path):
     qp = request.args.to_dict()
     body = get_body_json()
     method = request.method.upper()
-    logger.info(StringFormatter(
-        'Method %%pretty! | Path %%pretty! | QP %%pretty! | Body %%pretty!', [
-            method, path, qp, body,
-        ]))
+    # logger.info(StringFormatter(
+    #     'Method %%pretty! | Path %%pretty! | QP %%pretty! | Body %%pretty!', [
+    #         method, path, qp, body,
+    #     ]))
 
     if len(all_endpoints) == 0:
         logger.info("Mocked service was called while no expectations exist")

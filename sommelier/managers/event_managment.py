@@ -95,9 +95,15 @@ class EventManager(FlowListener):
 
     def must_be_empty(self, topic):
         messages = self.event_consumer.consume(topic, -1, drain_timeout=1)
-        empty = len(messages) == 0
-        if not empty:
-            self.drain_events(topic)
+        self.judge.expectation(
+            len(messages) == 0,
+            StringFormatter(
+                "Topic %%! still has some events, ignore or document them %%pretty!", [
+                    topic,
+                    messages,
+                ]),
+            api_enhancements=False
+        )
 
     def skip_events(self, topic, num_messages):
         num_messages = int(num_messages)
@@ -175,9 +181,9 @@ class EventManager(FlowListener):
         for e in events.values():
             j = JsonRetriever(self.ctx_m(), copy.deepcopy(e))
             for key in ignored_keys:
-                val = j.get(key)
+                val = j.get(key, strict=False)
                 j.delete(key)
-                if self.show_ignored:
+                if val is not None and self.show_ignored:
                     j.set(f"__ignored__.{key}", val)
             result.append(j.raw())
         return result
