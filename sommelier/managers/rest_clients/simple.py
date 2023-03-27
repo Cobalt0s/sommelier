@@ -32,7 +32,7 @@ class AuthApiClient(FlowListener):
     @abstractmethod
     def get_headers(self):
         return {
-            'App-Id': self.user_registry.get_application(),
+            'App-Id': self.user_registry.get_user_app(),
             'User-Id': self.user_registry.get_user_id(),
             'Role': self.user_registry.get_user_role(),
         }

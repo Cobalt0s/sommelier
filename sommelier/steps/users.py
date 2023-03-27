@@ -19,6 +19,6 @@ def grant_role(context, user_name, roles):
     user_registry.grant_user_role(user_name, roles)
 
 
-@given('Application of {app_name}')
-def set_application_name(context, app_name):
-    user_registry.select_application(app_name)
+@given('User {user_name} withing application {app_name}')
+def set_application_name(context, user_name, app_name):
+    user_registry.assign_user_app(user_name, app_name)
