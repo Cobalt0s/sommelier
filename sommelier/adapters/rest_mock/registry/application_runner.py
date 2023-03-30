@@ -4,6 +4,7 @@ from flask import Flask
 from werkzeug.serving import make_server
 
 
+DEFAULT_HOST = '0.0.0.0'
 DEFAULT_PORT = 7000
 
 
@@ -12,7 +13,7 @@ class ServerThread(threading.Thread):
 
     def __init__(self, app: Flask):
         threading.Thread.__init__(self)
-        self.server = make_server('127.0.0.1', DEFAULT_PORT, app)
+        self.server = make_server(DEFAULT_HOST, DEFAULT_PORT, app)
         self.ctx = app.app_context()
         self.ctx.push()
 
