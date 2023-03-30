@@ -14,11 +14,16 @@ from sommelier.utils import UrlUtils, require_var
 class AuthApiClient(FlowListener):
 
     def __init__(self, host_url):
-        super().__init__(managers={
+        super().__init__(definitions=[
+            ['headers_permanent', {}],
+            ['headers', {}],
+        ], managers={
             'carpenter': Carpenter,
             'labeling_machine': LabelingMachine,
             'response_holder': ResponseJsonHolder,
             'user_registry': UserRegistry,
+        }, permanent={
+            'headers_permanent': 'headers'
         })
         self.carpenter: Optional[Carpenter] = None
         self.labeling_machine: Optional[LabelingMachine] = None
@@ -31,11 +36,13 @@ class AuthApiClient(FlowListener):
     # common methods all operations rely on
     @abstractmethod
     def get_headers(self):
-        return {
+        result = {
             'App-Id': self.user_registry.get_user_app(),
             'User-Id': self.user_registry.get_user_id(),
             'Role': self.user_registry.get_user_role(),
         }
+        result.update(self.get_custom_headers())
+        return result
 
     def create_url(self, identifiers, url):
         resolved_ids = self.labeling_machine.find_many(identifiers)
@@ -84,3 +91,13 @@ class AuthApiClient(FlowListener):
         self.response_holder.with_description("DELETE", req_url)
         self.response_holder.hold(requests.delete(req_url, headers=self.get_headers()))
         return
+
+    ##########################################################
+    # behaviour alternation through state variables
+    def with_custom_headers(self, headers: dict):
+        self.ctx_m().set(f'headers', headers)
+        if self.is_permanent_mode():
+            self.ctx_m().set(f'headers_permanent', headers)
+
+    def get_custom_headers(self):
+        return self.ctx_m().get('headers')
