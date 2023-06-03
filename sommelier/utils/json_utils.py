@@ -71,7 +71,7 @@ class JsonRetriever:
         else:
             return self.path + f'.{key}'
 
-    def get(self, zoom, strict=True):
+    def get(self, zoom: str, strict=True):
         given_value = self
         if StringUtils.is_empty(zoom):
             return given_value
@@ -172,16 +172,20 @@ class JsonRetriever:
 
     def has(self, key):
         zoom = StringUtils.dot_separated_to_list(key)
-        data = self.data
-        try:
-            for i in range(len(zoom) - 1):
-                # zoom into data until last element
-                data = data[zoom[i]]
-            # last element should be inside json object
-            return zoom[-1] in data
-        except Exception:
-            # if during any zooming walk we abrupt then key is way off not in json
+        if len(zoom) == 1:
+            # check key or index in map or list
+            if StringUtils.is_array(key):
+                if isinstance(self.data, list):
+                    return len(self.data) > int(StringUtils.extract_array(key))
+                    # tried to dereference arr while data is of different type
+                return False
+            return key in self.data
+
+        last_element = self.get(StringUtils.list_to_comma_str(zoom[:-1]), strict=False)
+        if last_element is None:
             return False
+
+        return last_element.has(zoom[-1])
 
     def raw(self):
         return self.data

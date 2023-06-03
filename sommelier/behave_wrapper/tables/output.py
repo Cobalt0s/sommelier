@@ -152,6 +152,9 @@ class Table2D(TableXDimensions):
     def dict(self) -> dict:
         # convert from CSV notation to JSON aka Python dictionary
         payload = dict(self.data)
+        for k, v in payload.items():
+            payload[k] = StringUtils.try_convert_num(v)
+
         return expand_nested_keys(payload)
 
 

@@ -39,7 +39,9 @@ class WSocketManager(FlowListener):
     def read_data(self):
         response_json_holder.with_description("WS-Read", self.host)
         text = self.reader.read_one()
-        data = json.loads(text)
+        data = None
+        if text is not None:
+            data = json.loads(text)
         response_json_holder.hold(data)
 
     def write_data(self):
