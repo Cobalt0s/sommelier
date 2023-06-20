@@ -64,8 +64,8 @@ class StringUtils:
     def try_convert_num(text):
         try:
             return int(text)
-        except ValueError:
+        except Exception:
             try:
                 return float(text)
-            except ValueError:
+            except Exception:
                 return text

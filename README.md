@@ -1,14 +1,15 @@
 
-# Sommelier [WIP]
-## Behave wrapper for testing microservices in python
-Need to add customisation as now it just works for particular use case and not yet generalised.
+# 🍷 Sommelier
+## Behave wrapper for testing microservices in python 🐍
 
+## Check Examples to see testing setup and use cases
+
+TODO [WIP]
 
 ## Features
 
 * REST API calls to the service
 * Mocking dependant service calls
-  * ****TODO**** [WIP]
 * Kafka event
   * Consumption
     * Specify expected events, then assert
@@ -31,9 +32,13 @@ Need to add customisation as now it just works for particular use case and not y
     * **TODO**: cucumber example that calls the process
 * Helpers
   * JsonRetriever
-    * Special object that allows to access json with mixed dict keys and list indexes
+    * Goal: Behave table is in CSV format while we need to operate wit JSON under the hood 
+    * Wrapper data structure that allows to access json with mixed dict keys and list indexes
+      * Ex: data.customers.[3].name -> [3] is understood as accessing 4th object of data.customers list
   * Data table converters
     * Cucumber tables converted to dictionary (json), lists (columns)
+    * Two columns: json key, json value
+    * One column: json key, (allows checking key presence)
   * Assertions (equals/contains/missing)
     * **TODO**: cucumber example that calls the process
 
@@ -41,6 +46,8 @@ Need to add customisation as now it just works for particular use case and not y
 * Page navigation
   * **TODO**: this is cursor based (should be customizable)
 * Context Manager
-  * A lot of refactoring, all managers must use it as a 'Behave' context wrapper
-* Add Examples
-* Add Tests
+  * TODO: example of Dependency Injection
+  * TODO: variable scope management (permanent vs per-scenario scopes)
+* Add Framework Tests
+  * TODO CI automation
+  * TODO tests various used versions if any

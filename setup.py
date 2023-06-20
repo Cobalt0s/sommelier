@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='sommelier',
-    version='1.2.25',
+    version='1.2.27',
     packages=find_packages(),
     license='MIT',
     description='Testing wrapper of Behave library',
@@ -12,7 +12,8 @@ setup(
         'confluent-kafka==1.7.0',
         'requests>=2.28.1',
         'flask>=2.2.2',
-        'websockets>=10.4'
+        'websockets>=10.4',
+        'urllib3==1.26.6'
     ],
     url='https://github.com/Cobalt0s/sommelier',
     author='Constantin Koval',
