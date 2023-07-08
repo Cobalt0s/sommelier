@@ -51,6 +51,16 @@ class StringUtils:
         return text
 
     @staticmethod
+    def is_literal_string(text: str):
+        return text.startswith('`') and text.endswith('`')
+
+    @staticmethod
+    def extract_literal_string(text: str):
+        if StringUtils.is_literal_string(text):
+            return text[1:-1]
+        return text
+
+    @staticmethod
     def get_random_string(length):
         # choose from all lowercase letter
         letters = string.ascii_lowercase
@@ -62,6 +72,9 @@ class StringUtils:
 
     @staticmethod
     def try_convert_num(text):
+        if StringUtils.is_literal_string(text):
+            # user indicated that value must be a string despite being composed of numbers only
+            return StringUtils.extract_literal_string(text)
         try:
             return int(text)
         except Exception:

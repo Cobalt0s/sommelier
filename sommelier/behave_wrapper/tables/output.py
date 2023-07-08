@@ -152,8 +152,13 @@ class Table2D(TableXDimensions):
     def dict(self) -> dict:
         # convert from CSV notation to JSON aka Python dictionary
         payload = dict(self.data)
-        for k, v in payload.items():
-            payload[k] = StringUtils.try_convert_num(v)
+        for k, val in payload.items():
+            if isinstance(val, str):
+                payload[k] = StringUtils.try_convert_num(val)
+            elif isinstance(val, list):
+                payload[k] = [StringUtils.try_convert_num(x) for x in val]
+            else:
+                payload[k] = val
 
         return expand_nested_keys(payload)
 

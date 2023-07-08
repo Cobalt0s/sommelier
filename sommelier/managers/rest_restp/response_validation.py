@@ -90,12 +90,12 @@ class ResponseValidator(FlowListener):
             # exceptions to the rule are collected
             if not search_rule:
                 not_satisfactory_set.append(k)
-        verb = "doesn't"
+        verb = "doesn't include"
         if missing:
-            verb = "does"
-        self.judge.assumption(
+            verb = "includes"
+        self.judge.expectation(
             len(not_satisfactory_set) == 0,
-            f"Response {verb} include keys: {not_satisfactory_set}"
+            f"Response sadly {verb} keys: {not_satisfactory_set}"
         )
 
     def _apply_assert(self, key, assertion_func):

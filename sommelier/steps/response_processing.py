@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from behave import given, then, when
 
-from sommelier.behave_wrapper import response_json_holder, labeling_machine
+from sommelier.behave_wrapper import response_json_holder, labeling_machine, judge
 from sommelier.managers import response_validator, AssertionMethod
 from sommelier.utils import StringUtils
 
@@ -79,6 +79,27 @@ def save_item_id_with_zoom(context, key, item_id):
 def define_uuids(context, definitions):
     for d in StringUtils.comma_separated_to_list(definitions):
         labeling_machine.create_alias(d, str(uuid4()))
+
+
+@given('Define {name} as {var_type} = {value}')
+def define_variable(context, name, var_type, value):
+    def convert(v):
+        try:
+            if var_type == "int":
+                return int(v)
+            if var_type == "bool":
+                return bool(v)
+            if var_type == "empty":
+                return None
+            if var_type == "string":
+                return str(v)
+            raise Exception("unknown data type")
+        except:
+            judge.assumption(
+                False,
+                f"Couldn't define a variable {name} of type {var_type} with value {value}"
+            )
+    labeling_machine.create_alias(name, convert(value))
 
 
 @when('After waiting for {duration} seconds')
