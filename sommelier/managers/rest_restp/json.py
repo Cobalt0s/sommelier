@@ -13,7 +13,7 @@ def _bool_operation(use_or):
 
 def assert_json_properties_in_object(json):
     for zoom, expected_value in carpenter.builder().double().rows():
-        given_value = str(json.get(zoom).raw())
+        given_value = json.get(zoom).raw()
 
         judge.expectation(
             expected_value == given_value,

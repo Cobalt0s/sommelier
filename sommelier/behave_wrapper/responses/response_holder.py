@@ -91,5 +91,5 @@ class ResponseJsonHolder(FlowListener):
             if json is None:
                 return "No JSON"
             self.logger.error(f'Response is not ok "{code}", cannot extract id', json.raw())
-        value = self.body().get(key)
+        value = self.body().get(key).raw()
         self.labeling_machine.create_alias(alias, value)

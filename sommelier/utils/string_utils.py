@@ -13,6 +13,10 @@ class StringUtils:
     RANDOM_VAR = '#'
 
     @staticmethod
+    def list_to_dot_str(arr: list) -> str:
+        return DOT.join(arr)
+
+    @staticmethod
     def list_to_comma_str(arr: list) -> str:
         return COMMA.join(arr)
 
@@ -31,21 +35,22 @@ class StringUtils:
         return text.split(SPACE)
 
     @staticmethod
-    def is_array(text):
+    def is_array(text: str):
+        text = str(text)
         return text.startswith('[') and text.endswith(']')
 
     @staticmethod
-    def extract_array(text):
+    def extract_array(text: str):
         if StringUtils.is_array(text):
             return text[1:-1]
         return text
 
     @staticmethod
-    def is_variable(text):
+    def is_variable(text: str):
         return text.startswith('$')
 
     @staticmethod
-    def extract_variable(text):
+    def extract_variable(text: str):
         if StringUtils.is_variable(text):
             return text[1:]
         return text
@@ -61,10 +66,10 @@ class StringUtils:
         return text
 
     @staticmethod
-    def get_random_string(length):
+    def get_random_string(length: int):
         # choose from all lowercase letter
         letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(length))
+        return ''.join(random.choice(letters) for _ in range(length))
 
     @staticmethod
     def is_empty(text):

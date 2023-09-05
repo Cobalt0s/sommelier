@@ -1,4 +1,3 @@
-
 from sommelier.behave_wrapper import FlowListener
 from sommelier.utils import SimpleLogger
 
@@ -19,8 +18,7 @@ class LabelingMachine(FlowListener):
             'aliases_permanent': 'aliases'
         })
 
-    def create_alias(self, name, value):
-        value = str(value)
+    def create_alias(self, name: str, value: any):
         self.ctx_m().set(f'aliases.{name}', value)
         if self.is_permanent_mode():
             # This alias should be persisted for the whole test execution and should not be reset

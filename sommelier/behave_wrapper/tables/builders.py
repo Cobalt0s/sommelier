@@ -40,7 +40,7 @@ class CustomInCodeTable(TableBuilder):
         for k, v in payload.items():
             if isinstance(v, dict):
                 raise Exception("nested dictionaries are not supported in Tables")
-            self.rows.append([k, v])
+            self.rows.append([k, str(v)])
 
     def _to_2d_list(self):
         return self.rows

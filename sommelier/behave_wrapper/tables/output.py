@@ -145,12 +145,7 @@ class Table2D(TableXDimensions):
     def __init__(self, data) -> None:
         super().__init__(data)
 
-    def rows(self) -> Tuple[str, str]:
-        for row in self.data:
-            yield str(row[0]), str(row[1])
-
-    def dict(self) -> dict:
-        # convert from CSV notation to JSON aka Python dictionary
+    def rows(self) -> Tuple:
         payload = dict(self.data)
         for k, val in payload.items():
             if isinstance(val, str):
@@ -159,6 +154,14 @@ class Table2D(TableXDimensions):
                 payload[k] = [StringUtils.try_convert_num(x) for x in val]
             else:
                 payload[k] = val
+        for row in payload.items():
+            yield str(row[0]), row[1]
+
+    def dict(self) -> dict:
+        # convert from CSV notation to JSON aka Python dictionary
+        payload = {}
+        for key, val in self.rows():
+            payload[key] = val
 
         return expand_nested_keys(payload)
 

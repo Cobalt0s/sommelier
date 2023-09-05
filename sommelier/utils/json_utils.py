@@ -181,7 +181,7 @@ class JsonRetriever:
                 return False
             return key in self.data
 
-        last_element = self.get(StringUtils.list_to_comma_str(zoom[:-1]), strict=False)
+        last_element = self.get(StringUtils.list_to_dot_str(zoom[:-1]), strict=False)
         if last_element is None:
             return False
 
